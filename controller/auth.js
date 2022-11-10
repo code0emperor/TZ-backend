@@ -28,7 +28,7 @@ exports.signup = (req, res) => {
     }
 
     const verificationRoute = CryptoJS.AES.encrypt(
-      user._id,
+      user.email,
       process.env.SECRET
     ).toString();
 
@@ -120,7 +120,7 @@ exports.verifyEmail = (req, res) => {
         process.env.SECRET
       ).toString(CryptoJS.enc.Utf8);
 
-      if (user._id === id) {
+      if (user.email === id) {
         User.findByIdAndUpdate(
           user._id,
           { isVerified: 1 },
@@ -328,7 +328,7 @@ const sendMail_1 = (email, code, name, verRoute) => {
   
           <p>
             <strong style="color: white !important;">Here's your verification Link: </strong>
-            <b><big style="color: white !important;">http://technozion-22/verify/${verRoute}</big></b>
+            <a href="http://technozion-22/verify/${verRoute}"><b><big style="color: white !important;">http://technozion-22/verify/${verRoute}</big></b></a>
           </p>
           <small style="color: aqua !important;"
             >Please do not reply to this mail. It is auto generated and mails sent
