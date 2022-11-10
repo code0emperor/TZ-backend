@@ -1,6 +1,5 @@
 const User = require("../model/User");
 const jwt = require("jsonwebtoken");
-// const { expressjwt: jwt } = require("express-jwt");
 const dotenv = require("dotenv");
 
 dotenv.config({ path: "../config/config.env" });
@@ -23,19 +22,10 @@ exports.isSignedIn = (req, res, next) => {
     return res.status(401).json("You are not authenticated");
   }
 };
-// const verifyTokenAndAuthorization = (req,res,next) => {
-//   verifyToken(req,res,() => {
-//      if(req.user.id === req.params.id || req.user.isAdmin){
-//          next();
-//      }
-//      else { res.status(403).json("not allowed");}
-//   })
-// };
 
-//custom middlewares
 exports.unauthorizedAccess = (err, req, res, next) => {
-  console.log("hey");
-  console.log(err);
+  // console.log("hey");
+  // console.log(err);
   if (err.name === "UnauthorizedError") {
     return res.status(403).send({
       success: false,

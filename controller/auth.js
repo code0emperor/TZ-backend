@@ -27,7 +27,6 @@ exports.signup = (req, res) => {
       });
     }
     req.auth = { _id: user._id };
-    // const token = jwt.sign({ _id: user._id }, process.env.SECRET);
     var mail = await sendMail_1(user.email, user.isVerified, user.name);
     res.status(200).json({
       name: user.name,
@@ -55,28 +54,19 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.signin = async (req, res) => {
-  if (req.cookies.token) {
+  if (req.cookie.token) {
     res.status(400).json({ message: "User already logged in" });
     return;
   }
   const { email, password } = req.body;
 
-  // const user = await User.findOne({ email }, (err, user) => {
-  //   if (err || !user) {
-  //     return res.status(400).json({
-  //       error: "USER email does not exists",
-  //     });
-
-  //   }
-  //   return user;
-  // })
   const user = await User.findOne({ email });
 
   console.log(user);
   const hashpass = CryptoJS.AES.decrypt(
     user.encry_password,
     process.env.SECRET
-  ); // decrypting password
+  );
 
   const Originalpassword = hashpass.toString(CryptoJS.enc.Utf8);
 

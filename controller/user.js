@@ -1,5 +1,6 @@
 const User = require("../model/User");
 const crypto = require("crypto");
+const CryptoJS = require("crypto-js");
 const path = require("path");
 const dotenv = require("dotenv");
 const Token = require("../model/token");
@@ -31,10 +32,10 @@ exports.changePassword = (req, res) => {
       });
     }
     if (req.body.old_password) {
-      const encrypted_pass = crypto
-        .createHmac("sha256", user.salt)
-        .update(req.body.old_password)
-        .digest("hex");
+      const encrypted_pass = CryptoJS.AES.encrypt(
+        req.body.old_password,
+        process.env.SECRET
+      ).toString();
       if (user.encry_password === encrypted_pass) {
         if (!req.body.new_password1) {
           return res.status(401).json({
@@ -45,10 +46,10 @@ exports.changePassword = (req, res) => {
             msg: "New Passwords Do Not Match",
           });
         } else {
-          const encrypted_pass_new = crypto
-            .createHmac("sha256", user.salt)
-            .update(req.body.new_password1)
-            .digest("hex");
+          const encrypted_pass_new = CryptoJS.AES.encrypt(
+            req.body.new_password1,
+            process.env.SECRET
+          ).toString();
           user.encry_password = encrypted_pass_new;
           if (encrypted_pass_new === encrypted_pass) {
             return res.status(401).json({
