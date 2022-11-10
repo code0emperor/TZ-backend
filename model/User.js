@@ -1,6 +1,5 @@
 var mongoose = require("mongoose");
 
-
 var userSchema = new mongoose.Schema(
   {
     name: {
@@ -44,7 +43,7 @@ var userSchema = new mongoose.Schema(
     lastLogin: String,
     isVerified: {
       type: Number,
-      default: 123456,
+      default: 0,
     },
     userCode: {
       type: String,
@@ -53,6 +52,5 @@ var userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 module.exports = mongoose.model("TZ_user", userSchema);

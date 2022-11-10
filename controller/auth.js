@@ -26,8 +26,19 @@ exports.signup = (req, res) => {
         err: err.message,
       });
     }
+
+    const verificationRoute = CryptoJS.AES.encrypt(
+      user._id,
+      process.env.SECRET
+    ).toString();
+
     req.auth = { _id: user._id };
-    var mail = await sendMail_1(user.email, user.isVerified, user.name);
+    var mail = await sendMail_1(
+      user.email,
+      user.isVerified,
+      user.name,
+      verificationRoute
+    );
     res.status(200).json({
       name: user.name,
       email: user.email,
@@ -35,6 +46,7 @@ exports.signup = (req, res) => {
       isVerified: user.isVerified,
       eventsEnrolled: user.eventsEnrolled,
       userCode: user.userCode,
+      verificationRoute: verificationRoute,
       mailSent: mail,
     });
   });
@@ -63,12 +75,10 @@ exports.signin = async (req, res) => {
   const user = await User.findOne({ email });
 
   console.log(user);
-  const hashpass = CryptoJS.AES.decrypt(
+  const Originalpassword = CryptoJS.AES.decrypt(
     user.encry_password,
     process.env.SECRET
-  );
-
-  const Originalpassword = hashpass.toString(CryptoJS.enc.Utf8);
+  ).toString(CryptoJS.enc.Utf8);
 
   Originalpassword !== password && res.status(401).json("wrong credentials");
 
@@ -99,16 +109,21 @@ exports.signout = (req, res) => {
 
 exports.verifyEmail = (req, res) => {
   const user = req.auth;
-  const verificationCode = req.body.verificationCode;
+  const verificationRoute = req.body.verificationRoute;
   User.findById(user._id)
     .then((user) => {
-      if (user.isVerified === 0) {
+      if (user.isVerified === 1) {
         return res.status(202).json({ message: "Email already Verified" });
       }
-      if (user.isVerified === verificationCode) {
+      const id = CryptoJS.AES.decrypt(
+        verificationRoute,
+        process.env.SECRET
+      ).toString(CryptoJS.enc.Utf8);
+
+      if (user._id === id) {
         User.findByIdAndUpdate(
           user._id,
-          { isVerified: 0 },
+          { isVerified: 1 },
           { useFindAndModify: false }
         )
           .then((data) => {
@@ -121,8 +136,6 @@ exports.verifyEmail = (req, res) => {
           .catch((err) => {
             res.status(500).send({ message: err.message });
           });
-      } else {
-        return res.status(406).json({ message: "Invalid verification Code" });
       }
     })
     .catch((err) => {
@@ -287,7 +300,7 @@ exports.manageAccess = (req, res) => {
     });
 };
 
-const sendMail_1 = (email, code, name) => {
+const sendMail_1 = (email, code, name, verRoute) => {
   var transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
@@ -314,10 +327,9 @@ const sendMail_1 = (email, code, name) => {
           </p>
   
           <p>
-            <strong style="color: white !important;">Here's your verification code: </strong>
-            <b><big style="color: white !important;">${code}</big></b>
+            <strong style="color: white !important;">Here's your verification Link: </strong>
+            <b><big style="color: white !important;">http://technozion-22/verify/${verRoute}</big></b>
           </p>
-  
           <small style="color: aqua !important;"
             >Please do not reply to this mail. It is auto generated and mails sent
             here are not attended to.</small
