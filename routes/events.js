@@ -28,14 +28,12 @@ route.post(
 route.get("/getEvents", getEvents);
 route.get(
   "/getEvent/:id",
-  isSignedIn,
   unauthorizedAccess,
   hasReadWriteAccess,
   getEventById
 );
 route.get(
   "/getEventByEventID/:id",
-  isSignedIn,
   unauthorizedAccess,
   hasReadWriteAccess,
   getEventByEventID

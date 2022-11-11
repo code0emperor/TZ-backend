@@ -32,11 +32,11 @@ exports.changePassword = (req, res) => {
       });
     }
     if (req.body.old_password) {
-      const encrypted_pass = CryptoJS.AES.encrypt(
-        req.body.old_password,
+      const encrypted_pass = CryptoJS.AES.decrypt(
+        user.encry_password,
         process.env.SECRET
-      ).toString();
-      if (user.encry_password === encrypted_pass) {
+      ).toString(CryptoJS.enc.Utf8);
+      if (req.body.old_password === encrypted_pass) {
         if (!req.body.new_password1) {
           return res.status(401).json({
             msg: "New password is invalid",
