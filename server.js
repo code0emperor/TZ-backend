@@ -15,9 +15,13 @@ connectDB();
 const app = express();
 
 //Body Parser
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+const corsConfig = {
+  credentials: true,
+  origin: true,
+};
+app.use(cors(corsConfig));
 app.use(cookieParser());
 app.use("/api/auth", user);
 app.use("/api/blog", require("./routes/blogs"));

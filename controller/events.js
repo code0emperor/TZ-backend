@@ -115,7 +115,7 @@ exports.deleteEvent = (req, res) => {
   Event.findByIdAndDelete(id)
     .then((data) => {
       if (!data) {
-        res.status(400).send({ message: "Cannot Delete" });
+        res.status(200).send({ message: "Cannot Delete" });
       } else {
         res.status(200).send({
           message: "Event deleted successfully",
@@ -132,7 +132,7 @@ exports.registerEvent = (req, res) => {
   const eventID = req.params.id;
   Event.findOne({ eventID: eventID }, (err, event) => {
     if (err || !event) {
-      return res.status(400).json({ message: err.message });
+      return res.status(200).json({ message: err.message });
     } else {
       if (
         event.participant.findIndex((participant, index) => {
@@ -144,7 +144,7 @@ exports.registerEvent = (req, res) => {
         User.findById(cur_user._id, (err, user) => {
           if (err || !user) {
             return res
-              .status(400)
+              .status(200)
               .json({ message: "Couldn't find participant" });
           } else {
             if (user.eventsEnrolled.indexOf(event.eventID) > -1) {

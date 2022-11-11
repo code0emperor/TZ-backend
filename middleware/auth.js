@@ -8,7 +8,7 @@ dotenv.config({ path: "../config/config.env" });
 
 //protected routes
 exports.isSignedIn = (req, res, next) => {
-  const authHeader = req.headers.token || req.cookie.token;
+  const authHeader = req.headers.token || req.cookies.token;
   if (authHeader) {
     const token = authHeader;
     // console.log(token);

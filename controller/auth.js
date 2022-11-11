@@ -22,7 +22,7 @@ exports.signup = (req, res) => {
 
   user.save(async (err, user) => {
     if (err) {
-      return res.status(400).json({
+      return res.status(200).json({
         err: err.message,
       });
     }
@@ -40,6 +40,8 @@ exports.signup = (req, res) => {
       verificationRoute
     );
     res.status(200).json({
+      success: true,
+      message: "account made successfully",
       name: user.name,
       email: user.email,
       id: user._id,
@@ -66,12 +68,13 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.signin = async (req, res) => {
-  if (req.cookie.token) {
-    res.status(400).json({ message: "User already logged in" });
+  console.log(req.cookies);
+  if (req.cookies && req.cookies.token) {
+    res.status(200).json({ message: "User already logged in" });
     return;
   }
+  console.log(req.body);
   const { email, password } = req.body;
-
   const user = await User.findOne({ email });
 
   console.log(user);
@@ -80,7 +83,8 @@ exports.signin = async (req, res) => {
     process.env.SECRET
   ).toString(CryptoJS.enc.Utf8);
 
-  Originalpassword !== password && res.status(401).json("wrong credentials");
+  Originalpassword !== password &&
+    res.status(200).json({ success: false, message: "Invalid Credentials" });
 
   //create token
   const token = jwt.sign({ _id: user._id }, process.env.SECRET);
@@ -92,7 +96,8 @@ exports.signin = async (req, res) => {
   return res.status(200).json({
     name: user.name,
     email: user.email,
-    id: user._id,
+    success: true,
+    message: "Logged In Successful",
     isVerified: user.isVerified,
     eventsEnrolled: user.eventsEnrolled,
     token: token,
