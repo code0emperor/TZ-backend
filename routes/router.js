@@ -4,6 +4,7 @@ const route = express.Router();
 const {
   signin,
   signout,
+  issignedin,
   signup,
   verifyEmail,
   getCurrentUser,
@@ -30,6 +31,7 @@ route.get("/", (req, res) => {
 });
 route.post("/signup", signup);
 route.post("/signin", signin);
+route.get("/issignedin",issignedin);
 route.get("/signout", isSignedIn, unauthorizedAccess, signout);
 
 route.get("/user/:id", isSignedIn, unauthorizedAccess, isAdmin, getUserById);

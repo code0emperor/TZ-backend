@@ -127,45 +127,90 @@ exports.deleteEvent = (req, res) => {
     });
 };
 
+// exports.registerEvent = (req, res) => {
+//   const cur_user = req.auth;
+//   const eventID = req.params.id;
+//   Event.findOne({ eventID: eventID }, (err, event) => {
+//     if (err || !event) {
+//       return res.status(200).json({ message: err.message });
+//     } else {
+//       if (
+//         event.participant.findIndex((participant, index) => {
+//           if (participant.userID === cur_user._id) return true;
+//         }) > -1
+//       ) {
+//         return res.json({ message: "Participant Already Registered" });
+//       } else {
+//         User.findById(cur_user._id, (err, user) => {
+//           if (err || !user) {
+//             return res
+//               .status(200)
+//               .json({ message: "Couldn't find participant" });
+//           } else {
+//             if (user.eventsEnrolled.indexOf(event.eventID) > -1) {
+//               return res.json({ message: "Participant Already Registered" });
+//             } else {
+//               user.eventsEnrolled.push({
+//                 eventID: event.eventID,
+//                 name: event.name,
+//               });
+//               user.save();
+//               event.participant.push({
+//                 userID: cur_user._id,
+//                 name: user.name,
+//                 email: user.email,
+//               });
+//               event.save();
+//             }
+//           }
+//         });
+//         res.json({ message: "Participant Registered Successfully" });
+//       }
+//     }
+//   });
+// };
+
 exports.registerEvent = (req, res) => {
-  const cur_user = req.auth;
+  const users = req.body.emails;
   const eventID = req.params.id;
   Event.findOne({ eventID: eventID }, (err, event) => {
     if (err || !event) {
-      return res.status(200).json({ message: err.message });
+      return res.status(200).json({ message: err.message, success: false });
     } else {
-      if (
-        event.participant.findIndex((participant, index) => {
-          if (participant.userID === cur_user._id) return true;
-        }) > -1
-      ) {
-        return res.json({ message: "Participant Already Registered" });
-      } else {
-        User.findById(cur_user._id, (err, user) => {
+      const team = [];
+      for (let i = 0; i < users.length; i++) {
+        User.findOne({ email: users[i] }, (err, user) => {
           if (err || !user) {
-            return res
-              .status(200)
-              .json({ message: "Couldn't find participant" });
+            return res.status(200).json({
+              message: "Couldn't find participant",
+              success: false,
+              participant: users[i],
+            });
           } else {
             if (user.eventsEnrolled.indexOf(event.eventID) > -1) {
-              return res.json({ message: "Participant Already Registered" });
+              return res.status(200).json({
+                message: "Participant Already Registered",
+                participant: users[i],
+                success: false,
+              });
             } else {
-              user.eventsEnrolled.push({
-                eventID: event.eventID,
-                name: event.name,
-              });
-              user.save();
-              event.participant.push({
-                userID: cur_user._id,
-                name: user.name,
-                email: user.email,
-              });
-              event.save();
+              team.push(user);
             }
           }
         });
-        res.json({ message: "Participant Registered Successfully" });
       }
+      // eslint-disable-next-line array-callback-return
+      team.map((userID) => {
+        User.findById(userID, (err, user) => {
+          user.eventsEnrolled.push({
+            eventID: event.eventID,
+            name: event.name,
+          });
+          user.save();
+        });
+      });
+      event.participant.push(team);
+      event.save();
     }
   });
 };

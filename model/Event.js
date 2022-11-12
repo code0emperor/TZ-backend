@@ -53,15 +53,19 @@ const eventSchema = new mongoose.Schema(
     },
     start_date: {
       type: Date,
-      required: [true, "Please enter start time!"],
+      required: [true, "Please enter start date!"],
     },
     end_date: {
       type: Date,
-      required: [true, "Please enter end time!"],
+      required: [true, "Please enter end date!"],
     },
     duration: {
-      type: Date,
+      type: Number,
       required: [true, "Please enter duration of event!"],
+    },
+    startTime : {
+      type: Date,
+      required: [true, "Please enter start time!"],
     },
     is_live: {
       type: Boolean,

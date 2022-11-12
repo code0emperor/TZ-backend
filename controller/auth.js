@@ -67,21 +67,41 @@ exports.getAllUsers = (req, res) => {
   });
 };
 
+exports.issignedin = async (req, res) => {
+  if (req.cookies && req.cookies.token) {
+    try {
+      const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
+
+      const user = await User.findById(decoded._id);
+      if (user)
+        res.status(200).json({
+          isLoggedIn: true,
+          user: user,
+          message: "User already logged in",
+        });
+      else res.status(400).json({ isLoggedIn: false, message: "unauthorized" });
+    } catch (e) {
+      res.status(400).json({ isLoggedIn: false, message: "unauthorized" });
+    }
+
+    return;
+  } else
+    res
+      .status(200)
+      .json({ isLoggedIn: false, message: "User is not logged in" });
+};
+
 exports.signin = async (req, res) => {
   const { email, password } = req.body;
-  if (req.cookies && req.cookies.token)
-   {
+  if (req.cookies && req.cookies.token) {
+    try {
+      const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
 
-    try{
-   const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
-
-    const user = await User.findById(decoded._id);
-    if(user)   res.status(200).json({ message: "User already logged in" });
-    else   res.status(400).json({message:"unauthorized"});
-    }
-    catch(e)
-    {
-      res.status(400).json({message:"unauthorized"});
+      const user = await User.findById(decoded._id);
+      if (user) res.status(200).json({ message: "User already logged in" });
+      else res.status(400).json({ message: "unauthorized" });
+    } catch (e) {
+      res.status(400).json({ message: "unauthorized" });
     }
 
     return;
@@ -104,6 +124,7 @@ exports.signin = async (req, res) => {
   user.save();
   //send response to front end
   return res.status(200).json({
+    user: user,
     name: user.name,
     email: user.email,
     success: true,
@@ -116,12 +137,11 @@ exports.signin = async (req, res) => {
 };
 
 exports.signout = async (req, res) => {
-
-    res.clearCookie("token");
+  res.clearCookie("token");
   res.status(200).json({
+    success: true,
     message: "User signout successfully",
   });
-
 };
 
 exports.verifyEmail = (req, res) => {
