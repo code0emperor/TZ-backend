@@ -110,9 +110,10 @@ exports.signin = async (req, res) => {
   }
   const user = await User.findOne({ email });
 
-  if(!user)
-  {
-    return res.status(404).json({ success: false, message: "User Does Not Exist" })
+  if (!user) {
+    return res
+      .status(404)
+      .json({ success: false, message: "User Does Not Exist" });
   }
 
   const Originalpassword = CryptoJS.AES.decrypt(
