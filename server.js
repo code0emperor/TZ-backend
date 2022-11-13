@@ -17,11 +17,18 @@ const app = express();
 //Body Parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-const corsConfig = {
-  credentials: true,
-  origin: true,
-};
-app.use(cors(corsConfig));
+// const corsConfig = {
+//   credentials: true,
+//   origin: true,
+// };
+// app.use(cors(corsConfig));
+app.use(
+  cors({
+    origin: "https://www.technozion.in",
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use("/api/auth", user);
 app.use("/api/blog", require("./routes/blogs"));
