@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cors(corsConfig));
 app.use(
   cors({
-    origin: "https://www.technozion.in/",
+    origin: "https://www.technozion.in",
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
     credentials: true,
   })
