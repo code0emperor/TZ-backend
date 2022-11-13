@@ -117,9 +117,7 @@ exports.signin = async (req, res) => {
 
   if(!user)
   {
-    return res.status(404).json({
-      msg: "User does not exist"
-    })
+    return res.status(404).json({ success: false, message: "User Does Not Exist" })
   }
 
   const Originalpassword = CryptoJS.AES.decrypt(
