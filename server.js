@@ -32,7 +32,7 @@ app.use(cors(corsConfig));
 
 app.use(function (req, res, next) {
 
-  // Website you wish to allow to connect
+  // Website you wish to allow to connect ok
   res.setHeader('Access-Control-Allow-Origin', 'https://www.technozion.in');
 
   // Request methods you wish to allow
