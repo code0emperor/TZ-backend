@@ -39,6 +39,7 @@ exports.addEvent = (req, res) => {
   const event = new Event(fields);
   event.save((err, event) => {
     if (err) {
+      console.log(err.message);
       return res.status(400).json({
         err: err.message,
       });

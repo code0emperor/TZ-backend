@@ -133,7 +133,7 @@ exports.requestPasswordReset = async (req, res) => {
   if (token) await token.deleteOne();
   let resetToken = crypto.randomBytes(10).toString("hex");
   const hash = crypto
-    .createHmac("sha256", user.salt)
+    .createHmac("sha256", process.env.SECRET)
     .update(resetToken)
     .digest("hex");
 
@@ -142,7 +142,8 @@ exports.requestPasswordReset = async (req, res) => {
     token: hash,
     createdAt: Date.now(),
   }).save();
-
+   
+  console.log(hash);console.log(user._id);
   const link = `${process.env.HOST}/backend/resetPasswordPage?token=${resetToken}&id=${user._id}`;
   sendMail(email, link);
   return res.json({ message: "Mail Sent to Registered Mail" });
@@ -152,12 +153,15 @@ exports.resetPassword = async (req, res) => {
   const userId = req.query.id;
 
   const token = req.query.token;
+  // console.log(token);
   let passwordResetToken = await Token.findOne({ userId });
+  console.log(passwordResetToken);
   if (!passwordResetToken) {
-    return res.status(403).render("resetPassword", {
-      authCode: 3,
-      message: "Invalid or expired password reset token",
-    });
+    // return res.status(403).render("resetPassword", {
+      // authCode: 3,
+      // message: "Invalid or expired password reset token",
+      return res.status(403).json({message : "Invalid or expired reset token"});
+    // });
   }
 
   await User.findById(userId).exec((err, user) => {
@@ -168,7 +172,7 @@ exports.resetPassword = async (req, res) => {
       });
     }
     const hash_token = crypto
-      .createHmac("sha256", user.salt)
+      .createHmac("sha256", process.env.SECRET)
       .update(token)
       .digest("hex");
     if (hash_token != passwordResetToken.token) {
@@ -184,15 +188,17 @@ exports.resetPassword = async (req, res) => {
         message: "Passwords Do Not match",
       });
     }
-    const hash = crypto
-      .createHmac("sha256", user.salt)
-      .update(password1)
-      .digest("hex");
+    const hash = CryptoJS.AES.encrypt(
+      password1,
+      process.env.SECRET
+    ).toString();
+
     user.encry_password = hash;
+    console.log(hash);
     User.findByIdAndUpdate(
       { _id: user._id },
       { $set: user },
-      { new: true, useFindAndModify: false },
+      { new: true },
       async (err, new_user) => {
         if (err) {
           return res.status(400).json({
@@ -202,10 +208,10 @@ exports.resetPassword = async (req, res) => {
         await passwordResetToken.deleteOne();
         user.salt = undefined;
         user.encry_password = undefined;
-        res.render("resetPassword", {
-          authCode: 3,
-          message: "Password reset successfully",
-        });
+        // res.render("resetPassword", {
+        //   authCode: 3,
+        //   message: "Password reset successfully",
+        // });
       }
     );
   });
