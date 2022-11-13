@@ -100,7 +100,7 @@ exports.issignedin = async (req, res) => {
 exports.signin = async (req, res) => {
   const cookieToken = req.body.token;
   const { email, password } = req.body;
-  if (token) {
+  if (cookieToken) {
     try {
       const decoded = jwt.verify(cookieToken, process.env.SECRET);
 
