@@ -22,13 +22,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //   origin: true,
 // };
 // app.use(cors(corsConfig));
-const corsOptions ={
-  origin:'*', 
-  credentials:true,            //access-control-allow-credentials:true
-  optionSuccessStatus:200,
-}
-
-app.use(cors(corsOptions))
+app.use(
+  cors({
+    origin: "https://www.technozion.in/",
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use("/api/auth", user);
 app.use("/api/blog", require("./routes/blogs"));
