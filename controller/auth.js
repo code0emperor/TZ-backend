@@ -68,9 +68,10 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.issignedin = async (req, res) => {
-  if (req.cookies && req.cookies.token) {
+  const token = req.body.token;
+  if (token) {
     try {
-      const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
+      const decoded = jwt.verify(token, process.env.SECRET);
 
       const user = await User.findById(decoded._id);
       if (user)
@@ -92,10 +93,11 @@ exports.issignedin = async (req, res) => {
 };
 
 exports.signin = async (req, res) => {
+  const cookieToken = req.body.token;
   const { email, password } = req.body;
-  if (req.cookies && req.cookies.token) {
+  if (cookieToken) {
     try {
-      const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
+      const decoded = jwt.verify(cookieToken, process.env.SECRET);
 
       const user = await User.findById(decoded._id);
       if (user) res.status(200).json({ message: "User already logged in" });
@@ -107,6 +109,11 @@ exports.signin = async (req, res) => {
     return;
   }
   const user = await User.findOne({ email });
+
+  if(!user)
+  {
+    return res.status(404).json({ success: false, message: "User Does Not Exist" })
+  }
 
   const Originalpassword = CryptoJS.AES.decrypt(
     user.encry_password,
