@@ -68,14 +68,15 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.issignedin = async (req, res) => {
+  const token = req.token;
   console.log("hit in issignedin");
-  if(req.cookies){
+  if(token){
     console.log("exist");
-    console.log(req.cookies);
+    console.log(token);
   }
-  if (req.cookies && req.cookies.token) {
+  if (token) {
     try {
-      const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
+      const decoded = jwt.verify(token, process.env.SECRET);
 
       const user = await User.findById(decoded._id);
       if (user)
@@ -97,10 +98,11 @@ exports.issignedin = async (req, res) => {
 };
 
 exports.signin = async (req, res) => {
+  const cookieToken = req.token;
   const { email, password } = req.body;
-  if (req.cookies && req.cookies.token) {
+  if (token) {
     try {
-      const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
+      const decoded = jwt.verify(cookieToken, process.env.SECRET);
 
       const user = await User.findById(decoded._id);
       if (user) res.status(200).json({ message: "User already logged in" });
