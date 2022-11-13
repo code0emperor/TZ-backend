@@ -68,7 +68,7 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.issignedin = async (req, res) => {
-  const token = req.token;
+  const token = req.body.token;
   console.log("hit in issignedin");
   if(token){
     console.log("exist");
@@ -98,7 +98,7 @@ exports.issignedin = async (req, res) => {
 };
 
 exports.signin = async (req, res) => {
-  const cookieToken = req.token;
+  const cookieToken = req.body.token;
   const { email, password } = req.body;
   if (token) {
     try {
