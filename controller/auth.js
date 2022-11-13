@@ -68,6 +68,11 @@ exports.getAllUsers = (req, res) => {
 };
 
 exports.issignedin = async (req, res) => {
+  console.log("hit in issignedin");
+  if(req.cookies){
+    console.log("exist");
+    console.log(req.cookies);
+  }
   if (req.cookies && req.cookies.token) {
     try {
       const decoded = jwt.verify(req.cookies.token, process.env.SECRET);
