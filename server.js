@@ -6,6 +6,8 @@ const morgan = require("morgan");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const user = require("./routes/router");
+const paymentRoute = require("./routes/payment.js");
+
 // Load config
 dotenv.config({ path: "./config/config.env" });
 
@@ -54,6 +56,10 @@ app.use(cookieParser());
 app.use("/api/auth", user);
 app.use("/api/blog", require("./routes/blogs"));
 app.use("/api/event", require("./routes/events"));
+app.use("/api", paymentRoute);
+app.get("/api/getkey", (req, res) =>
+  res.status(200).json({ key: process.env.RAZORPAY_API_KEY })
+);
 //Logging
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 

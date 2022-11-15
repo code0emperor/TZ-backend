@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title: Technozion APIs
-  desccription: This contains documentation of all APIs from backend
+  description: This contains documentation of all APIs from backend
   version: "2.0.0"
   contact:
     email: rohitrajeev02@gmail.com
@@ -17,24 +17,24 @@ info:
 
   paths:
     /auth/signin:
-        post:
-          summary: Sign in data
-          consumes:
-            - application/json
-          parameters:
-            - in: body
-              name: user
-              description: The user to signin
-              schema:
-                type: object
-                required:
-                  - email
-                  - password
-                properties:
-                  email:
-                    type: string
-                  password:
-                    type: string
-          responses:
-            200:
-              description: Success
+      post:
+        summary: Sign in data
+        consumes:
+          - application/json
+        parameters:
+          - in: body
+            name: user
+            description: The user to signin
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+        responses:
+          200:
+            description: Success

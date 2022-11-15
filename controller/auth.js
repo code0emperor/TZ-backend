@@ -9,142 +9,166 @@ dotenv.config({
 });
 
 exports.signup = (req, res) => {
-  const fields = req.body;
+  try {
+    const fields = req.body;
 
-  const password = CryptoJS.AES.encrypt(
-    fields.encry_password,
-    process.env.SECRET
-  ).toString();
-
-  fields.encry_password = password;
-  // console.log(fields.encry_password);
-  const user = new User(fields);
-
-  user.save(async (err, user) => {
-    if (err) {
-      return res.status(200).json({
-        err: err.message,
-      });
-    }
-
-    const verificationRoute = CryptoJS.AES.encrypt(
-      user.email,
+    const password = CryptoJS.AES.encrypt(
+      fields.encry_password,
       process.env.SECRET
     ).toString();
 
-    req.auth = { _id: user._id };
-    var mail = await sendMail_1(
-      user.email,
-      user.isVerified,
-      user.name,
-      verificationRoute
-    );
-    res.status(200).json({
-      success: true,
-      message: "account made successfully",
-      name: user.name,
-      email: user.email,
-      id: user._id,
-      isVerified: user.isVerified,
-      eventsEnrolled: user.eventsEnrolled,
-      userCode: user.userCode,
-      verificationRoute: verificationRoute,
-      mailSent: mail,
+    fields.encry_password = password;
+    // console.log(fields.encry_password);
+    const user = new User(fields);
+
+    user.save((err, user) => {
+      if (err) {
+        return res.status(200).json({
+          err: err.message,
+          success: false,
+        });
+      }
+
+      const verificationRoute = CryptoJS.AES.encrypt(
+        user.email,
+        process.env.SECRET
+      ).toString();
+
+      req.auth = { _id: user._id };
+      var mail = sendMail_1(
+        user.email,
+        user.isVerified,
+        user.name,
+        verificationRoute
+      );
+      res.status(200).json({
+        success: true,
+        message: "account made successfully",
+        name: user.name,
+        email: user.email,
+        id: user._id,
+        isVerified: user.isVerified,
+        eventsEnrolled: user.eventsEnrolled,
+        userCode: user.userCode,
+        verificationRoute: verificationRoute,
+        mailSent: mail,
+      });
     });
-  });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
 };
 
 exports.getAllUsers = (req, res) => {
-  User.find({}, (err, user) => {
-    if (err) {
-      res.status(404).json({
-        error: err,
+  try {
+    User.find({}, (err, user) => {
+      if (err) {
+        res.status(404).json({
+          error: err,
+        });
+      }
+      res.status(200).json({
+        users: user,
       });
-    }
-    res.status(200).json({
-      users: user,
     });
-  });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
 };
 
-exports.issignedin = async (req, res) => {
+exports.issignedin = (req, res) => {
   const token = req.body.token;
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.SECRET);
 
-      const user = await User.findById(decoded._id);
-      if (user)
-        res.status(200).json({
-          isLoggedIn: true,
-          user: user,
-          message: "User already logged in",
-        });
-      else res.status(400).json({ isLoggedIn: false, message: "unauthorized" });
+      User.findById(decoded._id, (err, user) => {
+        if (user)
+          return res.status(200).json({
+            isLoggedIn: true,
+            user: user,
+            message: "User already logged in",
+          });
+        else
+          return res
+            .status(400)
+            .json({ isLoggedIn: false, message: "unauthorized" });
+      });
     } catch (e) {
-      res.status(400).json({ isLoggedIn: false, message: "unauthorized" });
+      return res
+        .status(400)
+        .json({ isLoggedIn: false, message: "unauthorized" });
     }
-
-    return;
   } else
-    res
+    return res
       .status(200)
       .json({ isLoggedIn: false, message: "User is not logged in" });
 };
 
-exports.signin = async (req, res) => {
+exports.signin = (req, res) => {
   const cookieToken = req.body.token;
   const { email, password } = req.body;
   if (cookieToken) {
     try {
       const decoded = jwt.verify(cookieToken, process.env.SECRET);
 
-      const user = await User.findById(decoded._id);
-      if (user) res.status(200).json({ message: "User already logged in" });
-      else res.status(400).json({ message: "unauthorized" });
+      User.findById(decoded._id, (err, user) => {
+        if (user)
+          return res
+            .status(200)
+            .json({ message: "User already logged in", success: true });
+        else
+          return res
+            .status(400)
+            .json({ message: "unauthorized", success: false });
+      });
     } catch (e) {
-      res.status(400).json({ message: "unauthorized" });
+      return res.status(400).json({ message: e.message, success: false });
+    }
+  }
+  User.findOne({ email }, (err, user) => {
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User Does Not Exist" });
     }
 
-    return;
-  }
-  const user = await User.findOne({ email });
+    if (user.isVerified !== 1) {
+      return res
+        .status(401)
+        .json({ message: "Account not verified", success: false });
+    }
 
-  if (!user) {
-    return res
-      .status(404)
-      .json({ success: false, message: "User Does Not Exist" });
-  }
+    const Originalpassword = CryptoJS.AES.decrypt(
+      user.encry_password,
+      process.env.SECRET
+    ).toString(CryptoJS.enc.Utf8);
 
-  const Originalpassword = CryptoJS.AES.decrypt(
-    user.encry_password,
-    process.env.SECRET
-  ).toString(CryptoJS.enc.Utf8);
+    Originalpassword !== password &&
+      res.status(200).json({ success: false, message: "Invalid Credentials" });
 
-  Originalpassword !== password &&
-    res.status(200).json({ success: false, message: "Invalid Credentials" });
-
-  //create token
-  const token = jwt.sign({ _id: user._id }, process.env.SECRET);
-  //put token in cookie
-  res.cookie("token", token, { expire: new Date() + 9999 });
-  user.lastLogin = new Date();
-  user.save();
-  //send response to front end
-  return res.status(200).json({
-    user: user,
-    name: user.name,
-    email: user.email,
-    success: true,
-    message: "Logged In Successful",
-    isVerified: user.isVerified,
-    eventsEnrolled: user.eventsEnrolled,
-    token: token,
-    userCode: user.userCode,
+    //create token
+    const token = jwt.sign({ _id: user._id }, process.env.SECRET);
+    //put token in cookie
+    res.cookie("token", token, { expire: new Date() + 9999 });
+    user.lastLogin = new Date();
+    user.save();
+    //send response to front end
+    return res.status(200).json({
+      user: user,
+      name: user.name,
+      email: user.email,
+      success: true,
+      message: "Logged In Successful",
+      isVerified: user.isVerified,
+      eventsEnrolled: user.eventsEnrolled,
+      token: token,
+      userCode: user.userCode,
+    });
   });
 };
 
-exports.signout = async (req, res) => {
+exports.signout = (req, res) => {
   res.clearCookie("token");
   res.status(200).json({
     success: true,
@@ -158,14 +182,16 @@ exports.verifyEmail = (req, res) => {
   User.findById(user._id)
     .then((user) => {
       if (user.isVerified === 1) {
-        return res.status(202).json({ message: "Email already Verified" });
+        return res
+          .status(202)
+          .json({ message: "Email already Verified", success: true });
       }
-      const id = CryptoJS.AES.decrypt(
+      const email = CryptoJS.AES.decrypt(
         verificationRoute,
         process.env.SECRET
       ).toString(CryptoJS.enc.Utf8);
 
-      if (user.email === id) {
+      if (user.email === email) {
         User.findByIdAndUpdate(
           user._id,
           { isVerified: 1 },
@@ -173,13 +199,19 @@ exports.verifyEmail = (req, res) => {
         )
           .then((data) => {
             if (!data) {
-              res.status(400).send({ message: "Cannot update" });
+              return res
+                .status(400)
+                .send({ message: "Cannot update", success: false });
             } else {
-              res.status(200).json({ message: "Email Verification Done" });
+              return res
+                .status(200)
+                .json({ message: "Email Verification Done", success: true });
             }
           })
           .catch((err) => {
-            res.status(500).send({ message: err.message });
+            return res
+              .status(500)
+              .send({ message: err.message, success: false });
           });
       }
     })
@@ -193,6 +225,7 @@ exports.getCurrentUser = (req, res) => {
   if (!user || !user._id) {
     return res.status(406).json({
       message: "user id should not be empty",
+      success: false,
     });
   }
   User.findById(user._id)
@@ -202,7 +235,7 @@ exports.getCurrentUser = (req, res) => {
       return res.status(200).json(user);
     })
     .catch((err) => {
-      return res.status(400).json({ message: "Bad request" });
+      return res.status(400).json({ message: err.message, success: false });
     });
 };
 
