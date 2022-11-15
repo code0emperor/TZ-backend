@@ -31,8 +31,11 @@ var userSchema = new mongoose.Schema(
       minlength: 6,
       required: [true, "Please Enter your password"],
     },
-    salt: String,
-    isSuperUser: {
+    paymentID: {
+      type: String,
+      default: "",
+    },
+    paid: {
       type: Boolean,
       default: false,
     },
