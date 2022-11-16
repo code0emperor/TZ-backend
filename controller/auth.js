@@ -186,6 +186,10 @@ exports.verifyEmail = (req, res) => {
   User.findOne({email: email}, (err, user) => {
     if(!user || err) 
       return res.status(300).json({message: "User not found", success: false});
+      
+    if(user.isVerified){
+      return res.status(200).json({message: "User Already Verified", success: true});
+    }
     user.isVerified = 1;
     user.save();
     return res.status(200).json({message: "User successfully verified", success: true});
