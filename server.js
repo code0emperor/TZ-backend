@@ -50,7 +50,7 @@ app.use(cors(corsConfig));
 //   // Pass to next layer of middleware
 //   next();
 // });
-
+//ok
 
 app.use(cookieParser());
 app.use("/api/auth", user);
