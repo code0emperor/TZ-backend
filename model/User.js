@@ -23,7 +23,6 @@ var userSchema = new mongoose.Schema(
     },
     isStudent: {
       type: Boolean,
-      required: [true, "Enter whether you are student or not"],
       default: true,
     },
     encry_password: {
