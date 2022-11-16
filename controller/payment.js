@@ -18,9 +18,9 @@ exports.checkout = async (req, res) => {
 };
 
 exports.paymentVerification = async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, user_id} =
     req.body;
-  const id = req.params.id;
+  const id = user_id;
   //  console.log(req.body);
 
   const body = razorpay_order_id + "|" + razorpay_payment_id;
