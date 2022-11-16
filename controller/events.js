@@ -166,7 +166,7 @@ exports.registerEvent = (req, res) => {
           let tempnum = "";
           code = req.body.code;
           for (let i = 0; i < code.length; i++) {
-            if (code[i] >= "0" && code[i] < "9") tempnum += code[i];
+            if (code[i] >= "0" && code[i] <= "9") tempnum += code[i];
             else tempnum = "";
           }
           num = Number.parseInt(tempnum);
