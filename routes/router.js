@@ -37,7 +37,7 @@ route.get("/signout", isSignedIn, unauthorizedAccess, signout);
 route.get("/user/:id", isSignedIn, unauthorizedAccess, isAdmin, getUserById);
 route.post("/changePassword", isSignedIn, unauthorizedAccess, changePassword);
 
-route.post("/verifyEmail", isSignedIn, unauthorizedAccess, verifyEmail);
+route.post("/verifyEmail", verifyEmail);
 route.get("/getCurrentUser", isSignedIn, unauthorizedAccess, getCurrentUser);
 route.get("/sendMail", isSignedIn, unauthorizedAccess, sendMail);
 
