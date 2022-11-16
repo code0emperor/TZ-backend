@@ -177,47 +177,19 @@ exports.signout = (req, res) => {
 };
 
 exports.verifyEmail = (req, res) => {
-  const user = req.auth;
+  // const user = req.auth;
   const verificationRoute = req.body.verificationRoute;
-  User.findById(user._id)
-    .then((user) => {
-      if (user.isVerified === 1) {
-        return res
-          .status(202)
-          .json({ message: "Email already Verified", success: true });
-      }
-      const email = CryptoJS.AES.decrypt(
-        verificationRoute,
-        process.env.SECRET
-      ).toString(CryptoJS.enc.Utf8);
-
-      if (user.email === email) {
-        User.findByIdAndUpdate(
-          user._id,
-          { isVerified: 1 },
-          { useFindAndModify: false }
-        )
-          .then((data) => {
-            if (!data) {
-              return res
-                .status(400)
-                .send({ message: "Cannot update", success: false });
-            } else {
-              return res
-                .status(200)
-                .json({ message: "Email Verification Done", success: true });
-            }
-          })
-          .catch((err) => {
-            return res
-              .status(500)
-              .send({ message: err.message, success: false });
-          });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err });
-    });
+  const email = CryptoJS.AES.decrypt(
+    verificationRoute,
+    process.env.SECRET
+  ).toString(CryptoJS.enc.Utf8);
+  User.findOne({email: email}, (err, user) => {
+    if(!user || err) 
+      return res.status(300).json({message: "User not found", success: false});
+    user.isVerified = 1;
+    user.save();
+    return res.status(200).json({message: "User successfully verified", success: true});
+  });
 };
 
 exports.getCurrentUser = (req, res) => {
