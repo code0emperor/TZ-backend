@@ -378,7 +378,7 @@ const sendMail_1 = (email, code, name, verRoute) => {
   
           <p>
             <strong style="color: white !important;">Here's your verification Link: </strong>
-            <a href="https://www.technozion.in/verify/${verRoute}"><b><big style="color: white !important;">http://technozion-22/verify/${verRoute}</big></b></a>
+            <a href="https://www.technozion.in/verify/${verRoute}"><b><big style="color: white !important;">https://www.technozion.in/verify/${verRoute}</big></b></a>
           </p>
           <small style="color: aqua !important;"
             >Please do not reply to this mail. It is auto generated and mails sent
