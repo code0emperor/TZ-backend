@@ -18,9 +18,9 @@ exports.checkout = async (req, res) => {
 };
 
 exports.paymentVerification = async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, user_id} =
     req.body;
-  const id = req.params.id;
+  const id = user_id;
   //  console.log(req.body);
 
   const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -46,13 +46,13 @@ exports.paymentVerification = async (req, res) => {
           .status(300)
           .json({ message: "No user found", success: false });
       user.paid = true;
+      user.paymentID = razorpay_payment_id;
       user.save();
     });
 
     res.status(200).json({
       success: true,
-      message: "payment successfully",
-      payment_id: razorpay_payment_id,
+      message: "payment successfully"
     });
     // res.redirect(
     //   `http://localhost:3333/paymentsuccess?reference=${razorpay_payment_id}`
@@ -61,6 +61,7 @@ exports.paymentVerification = async (req, res) => {
   } else {
     res.status(400).json({
       success: false,
+      message: "Payment failed"
     });
   }
 };
