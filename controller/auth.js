@@ -18,7 +18,12 @@ exports.signup = (req, res) => {
     ).toString();
 
     fields.encry_password = password;
-    // console.log(fields.encry_password);
+    const email = fields.email.split("@");
+    email[1] === "nitw.ac.in"
+      ? (fields.isStudent = true)
+      : (fields.isStudent = false);
+    // console.log(email);
+    if (fields.isStudent) fields.paid = true;
     const user = new User(fields);
 
     user.save((err, user) => {
@@ -47,11 +52,11 @@ exports.signup = (req, res) => {
         name: user.name,
         email: user.email,
         id: user._id,
-        isVerified: user.isVerified,
-        eventsEnrolled: user.eventsEnrolled,
         userCode: user.userCode,
+        isPaid: user.paid,
+        student: user.isStudent,
         verificationRoute: verificationRoute,
-        mailSent: mail,
+        mail: mail,
       });
     });
   } catch (err) {
@@ -183,16 +188,22 @@ exports.verifyEmail = (req, res) => {
     verificationRoute,
     process.env.SECRET
   ).toString(CryptoJS.enc.Utf8);
-  User.findOne({email: email}, (err, user) => {
-    if(!user || err) 
-      return res.status(300).json({message: "User not found", success: false});
-      
-    if(user.isVerified){
-      return res.status(200).json({message: "User Already Verified", success: true});
+  User.findOne({ email: email }, (err, user) => {
+    if (!user || err)
+      return res
+        .status(300)
+        .json({ message: "User not found", success: false });
+
+    if (user.isVerified) {
+      return res
+        .status(200)
+        .json({ message: "User Already Verified", success: true });
     }
     user.isVerified = 1;
     user.save();
-    return res.status(200).json({message: "User successfully verified", success: true});
+    return res
+      .status(200)
+      .json({ message: "User successfully verified", success: true });
   });
 };
 
