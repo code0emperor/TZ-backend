@@ -28,8 +28,17 @@ exports.signup = (req, res) => {
 
     user.save((err, user) => {
       if (err) {
+        let message = "Duplicate ";
+        let flag = false;
+        for (let i = 0; i < err.message.length; i++) {
+          if (err.message[i] === "{" || err.message[i] === "}") flag = !flag;
+          else if (flag && err.message[i] !== '"') {
+            message += err.message[i];
+          }
+        }
+        message += " registered";
         return res.status(200).json({
-          err: err.message,
+          message: message,
           success: false,
         });
       }
