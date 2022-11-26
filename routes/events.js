@@ -26,18 +26,8 @@ route.post(
   addEvent
 );
 route.get("/getEvents", getEvents);
-route.get(
-  "/getEvent/:id",
-  unauthorizedAccess,
-  hasReadWriteAccess,
-  getEventById
-);
-route.get(
-  "/getEventByEventID/:id",
-  unauthorizedAccess,
-  hasReadWriteAccess,
-  getEventByEventID
-);
+route.get("/getEvent/:id", getEventById);
+route.get("/getEventByEventID/:id", getEventByEventID);
 route.get(
   "/deleteEvent/",
   isSignedIn,

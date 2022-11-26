@@ -120,9 +120,11 @@ exports.issignedin = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  const cookieToken = req.body.token;
+  try{
+  
   const { email, password } = req.body;
-  if (cookieToken) {
+  if (req.body.cookieToken) {
+    const cookieToken = req.body.token;
     try {
       const decoded = jwt.verify(cookieToken, process.env.SECRET);
 
@@ -158,8 +160,8 @@ exports.signin = (req, res) => {
       process.env.SECRET
     ).toString(CryptoJS.enc.Utf8);
 
-    Originalpassword !== password &&
-      res.status(200).json({ success: false, message: "Invalid Credentials" });
+   if( Originalpassword !== password)
+      return res.status(200).json({ success: false, message: "Invalid Credentials" });
 
     //create token
     const token = jwt.sign({ _id: user._id }, process.env.SECRET);
@@ -180,6 +182,10 @@ exports.signin = (req, res) => {
       userCode: user.userCode,
     });
   });
+
+}catch(e){
+  return res.status(400).json({ message: e.message, success: false });
+}
 };
 
 exports.signout = (req, res) => {

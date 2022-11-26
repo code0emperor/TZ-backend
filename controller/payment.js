@@ -5,7 +5,7 @@ const { instance } = require("../razorpay_instance.js");
 
 exports.checkout = async (req, res) => {
   const options = {
-    amount: Number(300 * 100),
+    amount: Number(3 * 100),
     // notes : {"name" : req.body.name,"email":req.body.email,"phone":req.body.mobile},
     currency: "INR",
   };
