@@ -61,11 +61,11 @@ const eventSchema = new mongoose.Schema(
     },
     endTime: {
       type: Number,
-      required: [true, "Please the end time!"],
+      // required: [true, "Please the end time!"],
     },
     startTime: {
       type: Number,
-      required: [true, "Please enter start time!"],
+      // required: [true, "Please enter start time!"],
     },
     is_live: {
       type: Boolean,
