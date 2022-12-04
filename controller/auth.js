@@ -120,72 +120,76 @@ exports.issignedin = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  try{
-  
-  const { email, password } = req.body;
-  if (req.body.cookieToken) {
-    const cookieToken = req.body.token;
-    try {
-      const decoded = jwt.verify(cookieToken, process.env.SECRET);
+  try {
+    const { email, password } = req.body;
+    if (req.body.cookieToken) {
+      const cookieToken = req.body.token;
+      try {
+        const decoded = jwt.verify(cookieToken, process.env.SECRET);
 
-      User.findById(decoded._id, (err, user) => {
-        if (user)
-          return res
-            .status(200)
-            .json({ message: "User already logged in", success: true });
-        else
-          return res
-            .status(400)
-            .json({ message: "unauthorized", success: false });
+        User.findById(decoded._id, (err, user) => {
+          if (user)
+            return res
+              .status(200)
+              .json({ message: "User already logged in", success: true });
+          else
+            return res
+              .status(400)
+              .json({ message: "unauthorized", success: false });
+        });
+      } catch (e) {
+        return res.status(400).json({ message: e.message, success: false });
+      }
+    }
+    User.findOne({ email }, (err, user) => {
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User Does Not Exist" });
+      }
+
+      if (user.isVerified !== 1) {
+        return res
+          .status(401)
+          .json({
+            message:
+              "Please click on the link sent to your registered email to activate your account",
+            success: false,
+          });
+      }
+
+      const Originalpassword = CryptoJS.AES.decrypt(
+        user.encry_password,
+        process.env.SECRET
+      ).toString(CryptoJS.enc.Utf8);
+
+      if (Originalpassword !== password)
+        return res
+          .status(200)
+          .json({ success: false, message: "Invalid Credentials" });
+
+      //create token
+      const token = jwt.sign({ _id: user._id }, process.env.SECRET);
+      //put token in cookie
+      res.cookie("token", token, { expire: new Date() + 9999 });
+      user.lastLogin = new Date();
+      user.save();
+      //send response to front end
+      return res.status(200).json({
+        user: user,
+        name: user.name,
+        email: user.email,
+        success: true,
+        message: "Logged In Successful",
+        isVerified: user.isVerified,
+        eventsEnrolled: user.eventsEnrolled,
+        token: token,
+        userCode: user.userCode,
       });
-    } catch (e) {
-      return res.status(400).json({ message: e.message, success: false });
-    }
-  }
-  User.findOne({ email }, (err, user) => {
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User Does Not Exist" });
-    }
-
-    if (user.isVerified !== 1) {
-      return res
-        .status(401)
-        .json({ message: "Account not verified", success: false });
-    }
-
-    const Originalpassword = CryptoJS.AES.decrypt(
-      user.encry_password,
-      process.env.SECRET
-    ).toString(CryptoJS.enc.Utf8);
-
-   if( Originalpassword !== password)
-      return res.status(200).json({ success: false, message: "Invalid Credentials" });
-
-    //create token
-    const token = jwt.sign({ _id: user._id }, process.env.SECRET);
-    //put token in cookie
-    res.cookie("token", token, { expire: new Date() + 9999 });
-    user.lastLogin = new Date();
-    user.save();
-    //send response to front end
-    return res.status(200).json({
-      user: user,
-      name: user.name,
-      email: user.email,
-      success: true,
-      message: "Logged In Successful",
-      isVerified: user.isVerified,
-      eventsEnrolled: user.eventsEnrolled,
-      token: token,
-      userCode: user.userCode,
     });
-  });
-
-}catch(e){
-  return res.status(400).json({ message: e.message, success: false });
-}
+  } catch (e) {
+    return res.status(400).json({ message: e.message, success: false });
+  }
 };
 
 exports.signout = (req, res) => {
