@@ -96,18 +96,40 @@ exports.addTransaction = (req, res) => {
   console.log(body);
   // return res.json(body)
   const transaction = Transaction(body);
-  transaction.save((err, trn) => {
-    if (err) {
-      return res.status(400).json({
-        message: "Fail",
-        err: err.message,
-      });
-    }
-    res.status(200).json({
-      message: "Success",
-      trnId: trn._id,
-      ...body
-    });
+  
+    User.findById(userId, (err, user) => {
+      if(err)
+      {
+        return res.status(400).json({
+          err: err.message,
+        });
+      }
+
+      if(user.paymentID !== undefined || user.paymentID !== '')
+      {
+        return res.status(300).json({
+          message: "Already Paid. Please wait until we process your last transaction."
+        });
+      }
+      user.paymentID = transactionId;
+      user.save();
+
+      transaction.save((err, trn) => {
+        if (err) {
+          return res.status(400).json({
+            message: "Fail",
+            err: err.message,
+          });
+        }
+        return res.status(200).json({
+          message: "Success",
+          trnId: trn._id,
+          ...user._doc,
+          encry_password: undefined,
+          salt:undefined
+        });
+    })
+    
   })
 }
 
