@@ -105,7 +105,7 @@ exports.addTransaction = (req, res) => {
         });
       }
 
-      if(user.paymentID !== undefined || user.paymentID !== '')
+      if(user.paymentID !== undefined)
       {
         return res.status(300).json({
           message: "Already Paid. Please wait until we process your last transaction."
