@@ -117,6 +117,7 @@ exports.addTransaction = (req, res) => {
           return res.status(400).json({
             message: "Failed to Add to our database. Please try again",
             err: err.message,
+            data: body
           });
         }
         user.paymentID = transactionId;
