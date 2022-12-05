@@ -7,10 +7,4 @@ router.route("/checkout").post(checkout);
 
 router.route("/paymentverification").post(paymentVerification);
 
-router.route("/addTransaction").post(addTransaction);
-
-router.route("/manualPaymentVerification").post(manualPaymentVerification);
-
-router.route("/getAllTransactions").get(getAllTransactions);
-
 module.exports = router;
