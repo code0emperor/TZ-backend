@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { Payment } = require("../model/Payment.js");
+const { Transaction } = require("../model/Transaction.js");
 const User = require("../model/User.js");
 const { instance } = require("../razorpay_instance.js");
 
@@ -65,3 +66,65 @@ exports.paymentVerification = async (req, res) => {
     });
   }
 };
+
+exports.addTransaction = (req, res) => {
+  const { transactionId, amount, status } = req.body;
+  const userId = req.body.userId || req.auth?.user?._id;
+  const body = {
+    transactionId: transactionId,
+    userId: userId,
+    verified: false,
+    status: status,
+    amount: amount,
+  }
+  console.log(body);
+  // return res.json(body)
+  const transaction = Transaction(body);
+  transaction.save((err, trn) => {
+    if (err) {
+      return res.status(400).json({
+        err: err.message,
+      });
+    }
+    res.status(200).json({
+      message: "Success",
+      trnId: trn._id,
+      ...body
+    });
+  })
+}
+
+exports.manualPaymentVerification = (req, res) => {
+  const { transactionId } = req.body;
+
+  Transaction.findOne({transactionId: transactionId}, (err, trn) => {
+    if(err)
+    {
+      return res.status(400).json({
+        err: err.message,
+      });
+    }
+    trn.verified = true;
+    trn.save();
+
+    User.findById(trn.userId, (err, user) => {
+      if(err)
+      {
+        return res.status(400).json({
+          err: err.message,
+        });
+      }
+      user.paid = true;
+      user.save();
+      return res.status(200).json({
+        message: "Verified",
+      })
+    })
+  })
+}
+
+exports.getAllTransactions = (req, res) => {
+  Transaction.find().then((trn) => {
+    return res.status(200).json(trn);
+  })
+}
