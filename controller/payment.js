@@ -4,6 +4,14 @@ const { Transaction } = require("../model/Transaction.js");
 const User = require("../model/User.js");
 const { instance } = require("../razorpay_instance.js");
 
+/**
+ * Enums for Payment status
+ * 
+ * If user gets a pending payment then we will store their ifnormations
+ */
+const PAYMENT_SUCCESS = 1
+const PAYMENT_FAILURE = 0
+
 exports.checkout = async (req, res) => {
   const options = {
     amount: Number(3 * 100),
@@ -69,7 +77,15 @@ exports.paymentVerification = async (req, res) => {
 
 exports.addTransaction = (req, res) => {
   const { transactionId, amount, status } = req.body;
-  const userId = req.body.userId || req.auth?.user?._id;
+  const userId = req.auth?._id;
+
+  if (!userId)
+  {
+    return res.status(401).json({
+      message: "User Not Found",
+      status: "Failed"
+    })
+  }
   const body = {
     transactionId: transactionId,
     userId: userId,
@@ -83,6 +99,7 @@ exports.addTransaction = (req, res) => {
   transaction.save((err, trn) => {
     if (err) {
       return res.status(400).json({
+        message: "Fail",
         err: err.message,
       });
     }
