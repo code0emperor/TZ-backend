@@ -95,7 +95,6 @@ exports.addTransaction = (req, res) => {
   }
   console.log(body);
   // return res.json(body)
-  const transaction = Transaction(body);
   
     User.findById(userId, (err, user) => {
       if(err)
@@ -105,22 +104,24 @@ exports.addTransaction = (req, res) => {
         });
       }
 
-      if(user.paymentID !== undefined || user.paymentID !== '')
+      if(user.paymentID !== '')
       {
         return res.status(300).json({
           message: "Already Paid. Please wait until we process your last transaction."
         });
       }
-      user.paymentID = transactionId;
-      user.save();
+      const transaction = Transaction(body);
 
       transaction.save((err, trn) => {
         if (err) {
           return res.status(400).json({
-            message: "Fail",
+            message: "Failed to ",
             err: err.message,
           });
         }
+        user.paymentID = transactionId;
+        user.save();
+
         return res.status(200).json({
           message: "Success",
           trnId: trn._id,
