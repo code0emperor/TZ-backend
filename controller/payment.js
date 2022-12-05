@@ -107,7 +107,8 @@ exports.addTransaction = (req, res) => {
       if(user.paymentID !=='')
       {
         return res.status(300).json({
-          message: "Already Paid. Please wait until we process your last transaction."
+          message: "Already Paid. Please wait until we process your last transaction.",
+          data: body
         });
       }
       const transaction = Transaction(body);
