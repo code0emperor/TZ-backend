@@ -115,7 +115,7 @@ exports.addTransaction = (req, res) => {
       transaction.save((err, trn) => {
         if (err) {
           return res.status(400).json({
-            message: "Failed to ",
+            message: "Failed to Add to our database. Please try again",
             err: err.message,
           });
         }
