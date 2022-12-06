@@ -90,6 +90,44 @@ exports.getAllUsers = (req, res) => {
   }
 };
 
+exports.getUserCount = (req, res) => {
+  try {
+    let userCount = 0;
+    User.find({}, (err, user) => {
+      if (err) {
+        res.status(404).json({
+          error: err,
+        });
+      }
+      userCount++;
+    });
+    res.status(200).json({
+      userCount: userCount,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
+exports.getUserCount = (req, res) => {
+  try {
+    let studentCount = 0;
+    User.find({ isStudent: true }, (err, user) => {
+      if (err) {
+        res.status(404).json({
+          error: err,
+        });
+      }
+      studentCount++;
+    });
+    res.status(200).json({
+      studentCount: studentCount,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
 exports.issignedin = (req, res) => {
   const token = req.body.token;
   if (token) {
@@ -149,13 +187,11 @@ exports.signin = (req, res) => {
       }
 
       if (user.isVerified !== 1) {
-        return res
-          .status(401)
-          .json({
-            message:
-              "Please click on the link sent to your registered email to activate your account",
-            success: false,
-          });
+        return res.status(401).json({
+          message:
+            "Please click on the link sent to your registered email to activate your account",
+          success: false,
+        });
       }
 
       const Originalpassword = CryptoJS.AES.decrypt(
