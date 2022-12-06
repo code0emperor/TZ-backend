@@ -1,7 +1,16 @@
 const crypto = require("crypto");
 const { Payment } = require("../model/Payment.js");
+const { Transaction } = require("../model/Transaction.js");
 const User = require("../model/User.js");
 const { instance } = require("../razorpay_instance.js");
+
+/**
+ * Enums for Payment status
+ * 
+ * If user gets a pending payment then we will store their ifnormations
+ */
+const PAYMENT_SUCCESS = 1
+const PAYMENT_FAILURE = 0
 
 exports.checkout = async (req, res) => {
   const options = {
@@ -65,3 +74,99 @@ exports.paymentVerification = async (req, res) => {
     });
   }
 };
+
+exports.addTransaction = (req, res) => {
+  const { transactionId, amount, status } = req.body;
+  const userId = req.auth?._id;
+
+  if (!userId)
+  {
+    return res.status(401).json({
+      message: "User Not Found",
+      status: "Failed"
+    })
+  }
+  const body = {
+    transactionId: transactionId,
+    userId: userId,
+    verified: false,
+    status: status,
+    amount: amount,
+  }
+  console.log(body);
+  // return res.json(body)
+  
+    User.findById(userId, (err, user) => {
+      if(err)
+      {
+        return res.status(400).json({
+          err: err.message,
+        });
+      }
+
+      if(user.paymentID !=='')
+      {
+        return res.status(300).json({
+          message: "Already Paid. Please wait until we process your last transaction.",
+          data: body
+        });
+      }
+      const transaction = Transaction(body);
+
+      transaction.save((err, trn) => {
+        if (err) {
+          return res.status(400).json({
+            message: "Failed to Add to our database. Please try again",
+            err: err.message,
+            data: body
+          });
+        }
+        user.paymentID = transactionId;
+        user.save();
+
+        return res.status(200).json({
+          message: "Success",
+          trnId: trn._id,
+          ...user._doc,
+          encry_password: undefined,
+          salt:undefined
+        });
+    })
+    
+  })
+}
+
+exports.manualPaymentVerification = (req, res) => {
+  const { transactionId } = req.body;
+
+  Transaction.findOne({transactionId: transactionId}, (err, trn) => {
+    if(err)
+    {
+      return res.status(400).json({
+        err: err.message,
+      });
+    }
+    trn.verified = true;
+    trn.save();
+
+    User.findById(trn.userId, (err, user) => {
+      if(err)
+      {
+        return res.status(400).json({
+          err: err.message,
+        });
+      }
+      user.paid = true;
+      user.save();
+      return res.status(200).json({
+        message: "Verified",
+      })
+    })
+  })
+}
+
+exports.getAllTransactions = (req, res) => {
+  Transaction.find().then((trn) => {
+    return res.status(200).json(trn);
+  })
+}

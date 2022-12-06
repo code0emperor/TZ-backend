@@ -1,5 +1,5 @@
 const express = require("express");
-const { checkout, paymentVerification } = require("../controller/payment.js");
+const { checkout, paymentVerification, addTransaction, manualPaymentVerification, getAllTransactions } = require("../controller/payment.js");
 
 const router = express.Router();
 

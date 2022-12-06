@@ -19,7 +19,7 @@ exports.signup = (req, res) => {
 
     fields.encry_password = password;
     const email = fields.email.split("@");
-    email[1] === "nitw.ac.in"
+    email[1] === "student.nitw.ac.in"
       ? (fields.isStudent = true)
       : (fields.isStudent = false);
     // console.log(email);

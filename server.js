@@ -7,6 +7,7 @@ const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const user = require("./routes/router");
 const paymentRoute = require("./routes/payment.js");
+const transactionRoute = require("./routes/transaction.js")
 
 // Load config
 dotenv.config({ path: "./config/config.env" });
@@ -57,6 +58,7 @@ app.use("/api/auth", user);
 app.use("/api/blog", require("./routes/blogs"));
 app.use("/api/event", require("./routes/events"));
 app.use("/api", paymentRoute);
+app.use("/api", transactionRoute);
 app.get("/api/getkey", (req, res) =>
   res.status(200).json({ key: process.env.RAZORPAY_API_KEY })
 );
