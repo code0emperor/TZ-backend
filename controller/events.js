@@ -15,6 +15,50 @@ const splitTrim = (event) => {
   return ret;
 };
 
+const valToTime = (val) => {
+  const dat = Math.round(val * 24 * 60 * 60);
+  var pref = "AM"
+  if(val >= 0.5)
+    pref = "PM";
+  const secs = dat%60;
+  const mins = parseInt(dat/60)%60;
+  var pf = ""
+  if (mins < 10)
+    pf = "0";
+  const hours = (parseInt(dat/3600)%24)%12 == 0 ? 12 : (parseInt(dat/3600)%24)%12;
+  const time = hours+":"+pf+mins+pref
+  // console.log(time)
+  return time
+}
+
+const valToDate = (val) => {
+  const dat_val = {
+    44910: 15,
+    44911: 16,
+    44912: 17,
+    44913: 18,
+    44914: 19,
+  }
+
+  const Days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ]
+
+  const dateEval = new Date(2022, 11, dat_val[val])
+  const day = dateEval.getDay();
+  const month = dateEval.getMonth();
+  const year = dateEval.getFullYear();
+  const date = dateEval.getDate();
+
+  return `${Days[day]}, ${date}/${month+1}/${year}`
+} 
+
 exports.addEvent = (req, res) => {
   try {
     const errors = validationResult(req);
@@ -24,30 +68,39 @@ exports.addEvent = (req, res) => {
       });
     }
 
-    var fields = req.body;
-    if (req.body.poster !== "") {
-      fields["poster"] = req.body.poster;
-    } else {
-      fields["poster"] = "nothing";
-    }
+    var fields = req.body.all;
+    
+    fields.forEach(field => {
 
-    // let start_date = new Date(fields.start_date)
-    // let end_date = new Date(fields.end_date)
+      field.start_time = valToTime(field.start_time)
+      field.start_date = valToDate(field.start_date)
 
-    // fields.start_date = `${start_date.getFullYear}-${start_date.getMonth()}-${start_date.getDate()}`
-    // fields.end_date = `${end_date.getFullYear}-${end_date.getMonth()}-${end_date.getDate()}`
+      field.end_time = valToTime(field.end_time)
+      field.end_date = valToDate(field.end_date)
 
-    const event = new Event(fields);
-    event.save((err, event) => {
-      if (err) {
-        console.log(err.message);
-        return res.status(400).json({
-          err: err.message,
-        });
-      } else {
-        return res.status(200).json(event);
-      }
-    });
+      field.organised_by = splitTrim(field.organised_by)
+
+      // return res.json(field)
+      // let start_date = new Date(field.start_date)
+      // let end_date = new Date(field.end_date)
+
+      // field.start_date = `${start_date.getFullYear}-${start_date.getMonth()}-${start_date.getDate()}`
+      // field.end_date = `${end_date.getFullYear}-${end_date.getMonth()}-${end_date.getDate()}`
+
+      const event = new Event(field);
+      event.save((err, event) => {
+        if (err) {
+          console.log("Error: "+field.name);
+          console.log(err.message);
+          return res.status(400).json({
+            err: err.message,
+          });
+        } else {
+          console.log("Success: "+field.name)
+        }
+      });
+    })
+    return res.json({ message: "All Executed Successfully"})
   } catch (err) {
     return res.status(500).json({ message: err.message, success: false });
   }
@@ -159,7 +212,7 @@ exports.registerEvent = (req, res) => {
     Event.findOne({ eventID: eventID }, (err, event) => {
       if (err || !event) {
         return res.status(200).json({ message: err.message, success: false });
-      } else {
+      } else { 
         let code = "";
         let num = -1;
         if (req.body.code) {
