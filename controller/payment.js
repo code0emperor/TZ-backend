@@ -6,11 +6,11 @@ const { instance } = require("../razorpay_instance.js");
 
 /**
  * Enums for Payment status
- * 
+ *
  * If user gets a pending payment then we will store their ifnormations
  */
-const PAYMENT_SUCCESS = 1
-const PAYMENT_FAILURE = 0
+const PAYMENT_SUCCESS = 1;
+const PAYMENT_FAILURE = 0;
 
 exports.checkout = async (req, res) => {
   const options = {
@@ -27,8 +27,12 @@ exports.checkout = async (req, res) => {
 };
 
 exports.paymentVerification = async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, user_id} =
-    req.body;
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+    user_id,
+  } = req.body;
   const id = user_id;
   //  console.log(req.body);
 
@@ -61,7 +65,7 @@ exports.paymentVerification = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "payment successfully"
+      message: "payment successfully",
     });
     // res.redirect(
     //   `http://localhost:3333/paymentsuccess?reference=${razorpay_payment_id}`
@@ -70,21 +74,20 @@ exports.paymentVerification = async (req, res) => {
   } else {
     res.status(400).json({
       success: false,
-      message: "Payment failed"
+      message: "Payment failed",
     });
   }
 };
 
 exports.addTransaction = (req, res) => {
-  const { transactionId, amount, status } = req.body;
+  const { transactionId, amount, status, regDates } = req.body;
   const userId = req.auth?._id;
 
-  if (!userId)
-  {
+  if (!userId) {
     return res.status(401).json({
       message: "User Not Found",
-      status: "Failed"
-    })
+      status: "Failed",
+    });
   }
   const body = {
     transactionId: transactionId,
@@ -92,56 +95,55 @@ exports.addTransaction = (req, res) => {
     verified: false,
     status: status,
     amount: amount,
-  }
+  };
   console.log(body);
   // return res.json(body)
-  
-    User.findById(userId, (err, user) => {
-      if(err)
-      {
+
+  User.findById(userId, (err, user) => {
+    if (err) {
+      return res.status(400).json({
+        err: err.message,
+      });
+    }
+
+    if (user.paymentID !== "") {
+      return res.status(300).json({
+        message:
+          "Already Paid. Please wait until we process your last transaction.",
+        data: body,
+      });
+    }
+    const transaction = Transaction(body);
+
+    transaction.save((err, trn) => {
+      if (err) {
         return res.status(400).json({
+          message: "Failed to Add to our database. Please try again",
           err: err.message,
+          data: body,
         });
       }
+      user.paymentID = transactionId;
+      user.isPending = true;
+      user.regDates = regDates;
+      user.save();
 
-      if(user.paymentID !=='')
-      {
-        return res.status(300).json({
-          message: "Already Paid. Please wait until we process your last transaction.",
-          data: body
-        });
-      }
-      const transaction = Transaction(body);
-
-      transaction.save((err, trn) => {
-        if (err) {
-          return res.status(400).json({
-            message: "Failed to Add to our database. Please try again",
-            err: err.message,
-            data: body
-          });
-        }
-        user.paymentID = transactionId;
-        user.save();
-
-        return res.status(200).json({
-          message: "Success",
-          trnId: trn._id,
-          ...user._doc,
-          encry_password: undefined,
-          salt:undefined
-        });
-    })
-    
-  })
-}
+      return res.status(200).json({
+        message: "Success",
+        trnId: trn._id,
+        ...user._doc,
+        encry_password: undefined,
+        salt: undefined,
+      });
+    });
+  });
+};
 
 exports.manualPaymentVerification = (req, res) => {
   const { transactionId } = req.body;
 
-  Transaction.findOne({transactionId: transactionId}, (err, trn) => {
-    if(err)
-    {
+  Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
+    if (err) {
       return res.status(400).json({
         err: err.message,
       });
@@ -150,23 +152,35 @@ exports.manualPaymentVerification = (req, res) => {
     trn.save();
 
     User.findById(trn.userId, (err, user) => {
-      if(err)
-      {
+      if (err) {
         return res.status(400).json({
           err: err.message,
         });
       }
       user.paid = true;
+      user.isPending = false;
       user.save();
       return res.status(200).json({
         message: "Verified",
-      })
-    })
-  })
-}
+      });
+    });
+  });
+};
+
+exports.checkStatus = (req, res) => {
+  const userId = req.auth?._id;
+  User.findById(userId, (err, user) => {
+    if (err) {
+      return res.status(400).json({
+        err: err.message,
+      });
+    }
+    return res.status(200).json({ isVerified: user.isVerified });
+  });
+};
 
 exports.getAllTransactions = (req, res) => {
   Transaction.find().then((trn) => {
     return res.status(200).json(trn);
-  })
-}
+  });
+};

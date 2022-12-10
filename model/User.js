@@ -38,9 +38,17 @@ var userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isPending: {
+      type: Boolean,
+      default: false,
+    },
     eventsEnrolled: {
       type: Array,
       default: [],
+    },
+    regDates: {
+      type: String,
+      default: "000",
     },
     lastLogin: String,
     isVerified: {
