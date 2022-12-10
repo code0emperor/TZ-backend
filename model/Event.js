@@ -5,13 +5,12 @@ const eventSchema = new mongoose.Schema(
     eventID: {
       type: String,
       trim: true,
-      required: true,
+      required: false,
       maxlength: 200,
-      unique: true,
     },
     teamMates: {
-      type: Number,
-      default: 1,
+      type: String,
+      default: "1",
     },
     name: {
       type: String,
@@ -37,7 +36,7 @@ const eventSchema = new mongoose.Schema(
     },
     summary: {
       type: String,
-      required: [true, "Please enter summary of the event!"],
+      required: [false, "Please enter summary of the event!"],
     },
     description: {
       type: String,
@@ -52,23 +51,23 @@ const eventSchema = new mongoose.Schema(
       default: [],
     },
     start_date: {
-      type: Date,
+      type: String,
       required: [true, "Please enter start date!"],
     },
     end_date: {
-      type: Date,
+      type: String,
       required: [true, "Please enter end date!"],
     },
-    endTime: {
-      type: Number,
+    end_time: {
+      type: String,
       // required: [true, "Please the end time!"],
     },
-    startTime: {
-      type: Number,
+    start_time: {
+      type: String,
       // required: [true, "Please enter start time!"],
     },
     duration: {
-      type: Number,
+      type: String,
     },
     is_live: {
       type: Boolean,
