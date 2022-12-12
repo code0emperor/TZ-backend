@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const transactionSchema = new mongoose.Schema(
   {
     transactionId: {
-      type: Array,
+      type: String,
       required: true,
       unique: true,
     },
@@ -17,7 +17,7 @@ const transactionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: "Success",
+      default: "Pending",
       required: true,
     },
     formDates: {

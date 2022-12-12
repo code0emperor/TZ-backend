@@ -80,9 +80,8 @@ exports.paymentVerification = async (req, res) => {
 };
 
 exports.addTransaction = (req, res) => {
-  const { transactionId, amount, status, regDates, formDates } = req.body;
-  const userId = req.auth?._id;
-
+  const { transactionId, amount, regDates, formDates } = req.body;
+  const userId = req.body?.userId;
   if (!userId) {
     return res.status(401).json({
       message: "User Not Found",
@@ -93,8 +92,9 @@ exports.addTransaction = (req, res) => {
     transactionId: transactionId,
     userId: userId,
     verified: false,
-    status: status,
+    // status: status,
     amount: amount,
+    formDates: formDates,
   };
   console.log(body);
   // return res.json(body)
@@ -113,8 +113,14 @@ exports.addTransaction = (req, res) => {
         data: body,
       });
     }
+    if (regDates !== user.regDates) {
+      return res.status(400).json({
+        message: "Dates were tampered with",
+        success: false,
+      });
+    }
     const transaction = Transaction(body);
-
+    console.log("success saved trans");
     transaction.save((err, trn) => {
       if (err) {
         return res.status(400).json({
@@ -125,15 +131,12 @@ exports.addTransaction = (req, res) => {
       }
       user.paymentID = transactionId;
       user.isPending = true;
-      if (regDates !== user.regDates) {
-        return res.status(400).json({
-          message: "Dates were tampered with",
-          success: false,
-        });
+      if(!user.regDates){
+        user.regDates = "000";
       }
-      for (var i = 0; i < 3; i++)
-        if (regDates[i] == "1" || formDates[i] == "1") regDates[i] = "1";
-      user.regDates = regDates;
+      // for (var i = 0; i < 3; i++)
+      //   if (regDates[i] == "1" || formDates[i] == "1") regDates[i] = "1";
+      // user.regDates = regDates;
       user.save();
 
       return res.status(200).json({
@@ -194,8 +197,11 @@ exports.getAllTransactions = (req, res) => {
 };
 
 exports.getTransactions = (req, res) => {
-  const userId = req.auth?._id;
+  const userId = req.body?.userId;
+  console.log(userId);
   Transaction.find({ userId: userId }).then((user) => {
+    // console.log("hit");
+    console.log(user);
     return res.status(200).json(user);
   });
 };

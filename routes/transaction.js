@@ -20,6 +20,6 @@ route.get("/CheckVerificationStatus", checkStatus);
 
 route.get("/getAllTransactions", getAllTransactions);
 
-route.get("/getTransactions", isSignedIn, getTransactions);
+route.post("/getTransactions", getTransactions);
 
 module.exports = route;
