@@ -176,8 +176,6 @@ exports.manualPaymentVerification = (req, res) => {
 
   console.log({ transactionId, isVerified })
 
-  return res.json({ transactionId, isVerified });
-
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
     if (err) {
       return res.status(400).json({
