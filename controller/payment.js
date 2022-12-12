@@ -97,7 +97,7 @@ exports.addTransaction = (req, res) => {
     // status: status,
     amount: amount,
     formDates: formDates,
-    referredBy: referredBy,
+    referredBy: '',
     userName: ''
   }
   console.log(body);
@@ -162,7 +162,6 @@ exports.addTransaction = (req, res) => {
           if(err || !referral) {
             return res.status(400).json({
               message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
-              err: err.message,
               data: body
             });
           }
