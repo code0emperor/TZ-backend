@@ -125,7 +125,7 @@ exports.addTransaction = (req, res) => {
       });
     }
     const transaction = Transaction(body);
-    console.log("success saved trans");
+    // console.log("success saved trans");
     transaction.save((err, trn) => {
       if (err) {
         return res.status(400).json({
@@ -142,32 +142,35 @@ exports.addTransaction = (req, res) => {
       // for (var i = 0; i < 3; i++)
       //   if (regDates[i] == "1" || formDates[i] == "1") regDates[i] = "1";
       // user.regDates = regDates;
+      user.paymentID = transactionId;
       user.save();
+      const response = {
+        message: "Success",
+        trnId: trn._id,
+        ...user._doc,
+        encry_password: undefined,
+        salt:undefined
+      };
+      if(!referredBy || referredBy == "")
+      {
+        return res.status(200).json(response);
+      }
+      else{
+        Referrals.findOne({referralId: referredBy}, (err, referral) => {
+          if(err) {
+            return res.status(400).json({
+              message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
+              err: err.message,
+              data: body
+            });
+          }
 
-      Referrals.findOne({referralId: referredBy}, (err, referral) => {
+          referral.referralCount += 1;
+          referral.save();
 
-        user.paymentID = transactionId;
-        user.save();
-
-        if(err) {
-          return res.status(400).json({
-            message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
-            err: err.message,
-            data: body
-          });
-        }
-
-        referral.referralCount += 1;
-        referral.save();
-
-        return res.status(200).json({
-          message: "Success",
-          trnId: trn._id,
-          ...user._doc,
-          encry_password: undefined,
-          salt:undefined
-        });
-      })
+          return res.status(200).json(response);
+        })
+      }
     })
   })
 }

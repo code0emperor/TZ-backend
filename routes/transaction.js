@@ -23,7 +23,7 @@ route.post("/manualPaymentVerification", isSignedIn, isTreasury, manualPaymentVe
 
 route.get("/CheckVerificationStatus", checkStatus);
 
-route.get("/getAllTransactions", isSignedIn, isTreasury, getAllTransactions);
+route.post("/getAllTransactions", isSignedIn, isTreasury, getAllTransactions);
 
 route.post("/getTransactions", isSignedIn, getTransactions);
 
