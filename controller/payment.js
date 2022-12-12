@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { Payment } = require("../model/Payment.js");
+const { Referrals } = require("../model/Referral.js");
 const { Transaction } = require("../model/Transaction.js");
 const User = require("../model/User.js");
 const { instance } = require("../razorpay_instance.js");
@@ -80,8 +81,9 @@ exports.paymentVerification = async (req, res) => {
 };
 
 exports.addTransaction = (req, res) => {
-  const { transactionId, amount, regDates, formDates } = req.body;
-  const userId = req.body?.userId;
+  const { transactionId, amount, referredBy, regDates, formDates } = req.body;
+  const userId = req.auth?._id;
+
   if (!userId) {
     return res.status(401).json({
       message: "User Not Found",
@@ -95,12 +97,15 @@ exports.addTransaction = (req, res) => {
     // status: status,
     amount: amount,
     formDates: formDates,
+    referredBy: referredBy
   };
+
   console.log(body);
   // return res.json(body)
-
+  
   User.findById(userId, (err, user) => {
-    if (err) {
+    if(err)
+    {
       return res.status(400).json({
         err: err.message,
       });
@@ -126,7 +131,7 @@ exports.addTransaction = (req, res) => {
         return res.status(400).json({
           message: "Failed to Add to our database. Please try again",
           err: err.message,
-          data: body,
+          data: body
         });
       }
       user.paymentID = transactionId;
@@ -139,19 +144,40 @@ exports.addTransaction = (req, res) => {
       // user.regDates = regDates;
       user.save();
 
-      return res.status(200).json({
-        message: "Success",
-        trnId: trn._id,
-        ...user._doc,
-        encry_password: undefined,
-        salt: undefined,
-      });
-    });
-  });
-};
+      Referrals.findOne({referralId: referredBy}, (err, referral) => {
+
+        user.paymentID = transactionId;
+        user.save();
+
+        if(err) {
+          return res.status(400).json({
+            message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
+            err: err.message,
+            data: body
+          });
+        }
+
+        referral.referralCount += 1;
+        referral.save();
+
+        return res.status(200).json({
+          message: "Success",
+          trnId: trn._id,
+          ...user._doc,
+          encry_password: undefined,
+          salt:undefined
+        });
+      })
+    })
+  })
+}
 
 exports.manualPaymentVerification = (req, res) => {
-  const { transactionId } = req.body;
+  const { transactionId, isVerified } = req.body;
+
+  console.log({ transactionId, isVerified })
+
+  return res.json({ transactionId, isVerified });
 
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
     if (err) {
@@ -159,7 +185,9 @@ exports.manualPaymentVerification = (req, res) => {
         err: err.message,
       });
     }
-    trn.verified = true;
+    trn.verified = isVerified;
+    trn.status = isVerified ? "Success" : trn.status;
+    trn.verificationStatus = isVerified ? 1 : 2;
     trn.save();
 
     User.findById(trn.userId, (err, user) => {
@@ -193,11 +221,42 @@ exports.checkStatus = (req, res) => {
 exports.getAllTransactions = (req, res) => {
   Transaction.find().then((trn) => {
     return res.status(200).json(trn);
-  });
-};
+  })
+}
+
+const makeReferralCode = (code) => {
+  var cd = "TZ";
+  var count = 2;
+  if(code > 9)
+    count -= 1
+  if(code > 99)
+    count -= 1
+  for(var i=0;i<count;i++) {
+    cd += "0"
+  }
+  cd += code;
+  return cd;
+}
+
+exports.addReferralCodes = (req, res) => {
+  const { referralCodes } = req.body;
+  referralCodes.forEach((code) => {
+    code.referralId = makeReferralCode(code.referralId)
+    const ref = new Referrals(code);
+    ref.save((err, ref) => {
+      if(err){
+        console.log("Error Occured at:",code.referralId,code.subCoreName);
+        console.log("Error:", err.message)
+        return res.status(400).json({message: err.message, success: false })
+      }
+      console.log("[Success]", ref.referralId, ref.subCoreName)
+    })
+  })
+  return res.json({ message: "All Executed Successfully"})
+}
 
 exports.getTransactions = (req, res) => {
-  const userId = req.body?.userId;
+  const userId = req.auth?._id;
   console.log(userId);
   Transaction.find({ userId: userId }).then((user) => {
     // console.log("hit");

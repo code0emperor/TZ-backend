@@ -28,6 +28,15 @@ const transactionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    referredBy:{
+      type: String,
+      default: '',
+      required: false,
+    },
+    verificationStatus:{
+      type: Number,   // 0 - pending, 1 - success, 2 - reject
+      default: 0,
+    }
   },
   { timestamps: true }
 );
