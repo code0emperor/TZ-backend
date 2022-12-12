@@ -180,16 +180,18 @@ exports.addTransaction = (req, res) => {
 exports.manualPaymentVerification = (req, res) => {
   const { transactionId, isVerified } = req.body;
 
-  console.log({ transactionId, isVerified })
+  // console.log({ transactionId, isVerified })
 
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
-    if (err) {
+    // console.log(err,trn)
+    if (err || !trn) {
       return res.status(400).json({
-        err: err.message,
+        message: "Transaction not found",
       });
     }
+    
     trn.verified = isVerified;
-    trn.status = isVerified ? "Success" : trn.status;
+    // console.log("Sufiyan Ansari 2")
     trn.verificationStatus = isVerified ? 1 : 2;
     trn.save();
 
