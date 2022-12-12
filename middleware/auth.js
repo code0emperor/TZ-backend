@@ -34,7 +34,7 @@ exports.isTreasury = (req, res, next) => {
       next();
     else res.status(403).json({message: "You are not authorized to access this"})
   })
-};
+}; 
 
 exports.unauthorizedAccess = (err, req, res, next) => {
   // console.log("hey");
