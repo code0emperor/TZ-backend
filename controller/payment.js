@@ -159,7 +159,7 @@ exports.addTransaction = (req, res) => {
       }
       else{
         Referrals.findOne({referralId: referredBy}, (err, referral) => {
-          if(err) {
+          if(err || !referral) {
             return res.status(400).json({
               message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
               err: err.message,
