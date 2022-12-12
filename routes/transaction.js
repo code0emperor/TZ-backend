@@ -25,7 +25,7 @@ route.get("/CheckVerificationStatus", checkStatus);
 
 route.get("/getAllTransactions", getAllTransactions);
 
-// route.post("/addReferralCodes", addReferralCodes)
+// route.post("/addReferralCodes",, isSignedIn, isTreasury, addReferralCodes)
 
 route.get("/getTransactions", isSignedIn, getTransactions);
 
