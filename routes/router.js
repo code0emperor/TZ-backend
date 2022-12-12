@@ -9,6 +9,7 @@ const {
   verifyEmail,
   getCurrentUser,
   sendMail,
+  getUserCount,
   getAllUsers,
 } = require("../controller/auth");
 
@@ -39,6 +40,7 @@ route.post("/changePassword", isSignedIn, unauthorizedAccess, changePassword);
 
 route.post("/verifyEmail", verifyEmail);
 route.get("/getCurrentUser", isSignedIn, unauthorizedAccess, getCurrentUser);
+route.get("/getUserCount", getUserCount);
 route.get("/sendMail", isSignedIn, unauthorizedAccess, sendMail);
 
 route.get("/tzCheck", isSignedIn, unauthorizedAccess, isAdmin, getAllUsers);

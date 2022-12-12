@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 
-const transactionSchema = new mongoose.Schema({
+const transactionSchema = new mongoose.Schema(
+  {
     transactionId: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     userId: {
       type: String,
@@ -14,12 +15,16 @@ const transactionSchema = new mongoose.Schema({
       type: Boolean,
       default: false,
     },
-    status:{
+    status: {
       type: String,
-      default: 'Success',
+      default: "Success",
       required: true,
     },
-    amount:{
+    formDates: {
+      type: String,
+      default: "000",
+    },
+    amount: {
       type: Number,
       required: true,
     },
