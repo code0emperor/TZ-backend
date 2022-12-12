@@ -159,7 +159,7 @@ exports.addTransaction = (req, res) => {
       }
       else{
         Referrals.findOne({referralId: referredBy}, (err, referral) => {
-          if(err) {
+          if(err || !referral) {
             return res.status(400).json({
               message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
               err: err.message,
@@ -184,13 +184,15 @@ exports.manualPaymentVerification = (req, res) => {
   // console.log({ transactionId, isVerified });
 
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
-    if (err) {
+    // console.log(err,trn)
+    if (err || !trn) {
       return res.status(400).json({
-        err: err.message,
+        message: "Transaction not found",
       });
     }
+    
     trn.verified = isVerified;
-    trn.status = isVerified ? "Success" : trn.status;
+    // console.log("Sufiyan Ansari 2")
     trn.verificationStatus = isVerified ? 1 : 2;
     trn.save();
     User.findById(trn.userId, (err, user) => {
