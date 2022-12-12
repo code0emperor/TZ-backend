@@ -211,11 +211,30 @@ exports.manualPaymentVerification = (req, res) => {
         }
         s = s.join('');
         user.regDates = s;
+
+        user.save();
+        return res.status(200).json({
+          message: "Verified",
+        });
+
       }
-      user.save();
-      return res.status(200).json({
-        message: "Verified",
-      });
+      else {
+        user.save();
+        Referrals.findOne({referralId: trn.referredBy}, (err, referral) => {
+          if(err || !referral) {
+            return res.status(200).json({
+              message: "Verified",
+            });
+          }
+
+          referral.referralCount -= 1;
+          referral.save();
+
+          return res.status(200).json({
+            message: "Verified",
+          });
+        })
+      }
     });
   });
 };
