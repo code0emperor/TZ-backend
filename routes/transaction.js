@@ -6,6 +6,7 @@ const {
   manualPaymentVerification,
   getAllTransactions,
   checkStatus,
+  getTransactions,
 } = require("../controller/payment.js");
 
 // MIDDLEWARE
@@ -18,5 +19,7 @@ route.post("/manualPaymentVerification", manualPaymentVerification);
 route.get("/CheckVerificationStatus", checkStatus);
 
 route.get("/getAllTransactions", getAllTransactions);
+
+route.get("/getTransactions", isSignedIn, getTransactions);
 
 module.exports = route;

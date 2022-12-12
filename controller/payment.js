@@ -80,7 +80,7 @@ exports.paymentVerification = async (req, res) => {
 };
 
 exports.addTransaction = (req, res) => {
-  const { transactionId, amount, status, regDates } = req.body;
+  const { transactionId, amount, status, regDates, formDates } = req.body;
   const userId = req.auth?._id;
 
   if (!userId) {
@@ -125,6 +125,14 @@ exports.addTransaction = (req, res) => {
       }
       user.paymentID = transactionId;
       user.isPending = true;
+      if (regDates !== user.regDates) {
+        return res.status(400).json({
+          message: "Dates were tampered with",
+          success: false,
+        });
+      }
+      for (var i = 0; i < 3; i++)
+        if (regDates[i] == "1" || formDates[i] == "1") regDates[i] = "1";
       user.regDates = regDates;
       user.save();
 
@@ -182,5 +190,12 @@ exports.checkStatus = (req, res) => {
 exports.getAllTransactions = (req, res) => {
   Transaction.find().then((trn) => {
     return res.status(200).json(trn);
+  });
+};
+
+exports.getTransactions = (req, res) => {
+  const userId = req.auth?._id;
+  Transaction.find({ userId: userId }).then((user) => {
+    return res.status(200).json(user);
   });
 };
