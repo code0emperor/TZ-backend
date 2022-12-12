@@ -97,9 +97,9 @@ exports.addTransaction = (req, res) => {
     // status: status,
     amount: amount,
     formDates: formDates,
-    referredBy: referredBy
-  };
-
+    referredBy: referredBy,
+    userName: ''
+  }
   console.log(body);
   // return res.json(body)
   
@@ -110,6 +110,8 @@ exports.addTransaction = (req, res) => {
         err: err.message,
       });
     }
+
+    body.userName = user.name;
 
     if (user.paymentID !== "") {
       return res.status(300).json({
@@ -179,8 +181,6 @@ exports.manualPaymentVerification = (req, res) => {
   const { transactionId, isVerified } = req.body;
 
   console.log({ transactionId, isVerified })
-
-  return res.json({ transactionId, isVerified });
 
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
     if (err) {

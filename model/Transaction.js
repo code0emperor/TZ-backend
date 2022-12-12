@@ -11,6 +11,10 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userName: {
+      type: String,
+      default: ''
+    },
     verified: {
       type: Boolean,
       default: false,
