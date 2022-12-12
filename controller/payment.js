@@ -96,7 +96,8 @@ exports.addTransaction = (req, res) => {
     verified: false,
     status: status,
     amount: amount,
-    referredBy: referredBy
+    referredBy: referredBy,
+    userName: ''
   }
   console.log(body);
   // return res.json(body)
@@ -108,6 +109,8 @@ exports.addTransaction = (req, res) => {
         err: err.message,
       });
     }
+
+    body.userName = user.name;
 
     if (user.paymentID !== "") {
       return res.status(300).json({
