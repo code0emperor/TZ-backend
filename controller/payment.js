@@ -177,9 +177,10 @@ exports.addTransaction = (req, res) => {
 }
 
 exports.manualPaymentVerification = (req, res) => {
+  // console.log(req.body)
   const { transactionId, isVerified } = req.body;
 
-  // console.log({ transactionId, isVerified })
+  // console.log({ transactionId, isVerified });
 
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
     // console.log(err,trn)
@@ -193,7 +194,6 @@ exports.manualPaymentVerification = (req, res) => {
     // console.log("Sufiyan Ansari 2")
     trn.verificationStatus = isVerified ? 1 : 2;
     trn.save();
-
     User.findById(trn.userId, (err, user) => {
       if (err) {
         return res.status(400).json({
@@ -202,6 +202,16 @@ exports.manualPaymentVerification = (req, res) => {
       }
       user.paid = true;
       user.isPending = false;
+      user.paymentID = '';
+      if(isVerified){
+        let s = [];
+        for(var i = 0; i < 3; ++i){
+          if(trn.formDates[i] == '1' || user.regDates[i] == '1')s.push('1');
+          else s.push('0');
+        }
+        s = s.join('');
+        user.regDates = s;
+      }
       user.save();
       return res.status(200).json({
         message: "Verified",

@@ -27,7 +27,7 @@ exports.isSignedIn = (req, res, next) => {
 
 exports.isTreasury = (req, res, next) => {
   const userId = req.auth?._id;
-
+  
   User.findById(userId, (err, user) => {
     if(err) return res.status(403).json({message: err.message});
     if(user.userCode === "5676")
