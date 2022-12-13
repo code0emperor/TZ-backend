@@ -80,6 +80,10 @@ exports.addEvent = (req, res) => {
 
       field.organised_by = splitTrim(field.organised_by)
 
+      field.location = field.location || 'TBD'
+
+      field.poster = field.poster || 'https://pbs.twimg.com/profile_images/908005302225723392/SEaaeJUH_400x400.jpg'
+
       // return res.json(field)
       // let start_date = new Date(field.start_date)
       // let end_date = new Date(field.end_date)
@@ -109,7 +113,7 @@ exports.addEvent = (req, res) => {
 exports.getEvents = (req, res) => {
   try {
     Event.find()
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .then((events) => {
         res.status(200).json(events);
       })

@@ -97,7 +97,7 @@ exports.addTransaction = (req, res) => {
     // status: status,
     amount: amount,
     formDates: formDates,
-    referredBy: '',
+    referredBy: referredBy,
     userName: ''
   }
   console.log(body);
