@@ -70,11 +70,7 @@ const eventSchema = new mongoose.Schema(
     },
     duration: {
       type: String,
-<<<<<<< HEAD
-      default: "NA"
-=======
       dafault: "0 Hours",
->>>>>>> d95b80bfefe312d518c02bc029977d8c45d6c3d3
     },
     is_live: {
       type: Boolean,
