@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { Payment } = require("../model/Payment.js");
+const { Referrals } = require("../model/Referral.js");
 const { Transaction } = require("../model/Transaction.js");
 const User = require("../model/User.js");
 const { instance } = require("../razorpay_instance.js");
@@ -80,7 +81,7 @@ exports.paymentVerification = async (req, res) => {
 };
 
 exports.addTransaction = (req, res) => {
-  const { transactionId, amount, status, regDates, formDates } = req.body;
+  const { transactionId, amount, referredBy, regDates, formDates } = req.body;
   const userId = req.auth?._id;
 
   if (!userId) {
@@ -93,18 +94,24 @@ exports.addTransaction = (req, res) => {
     transactionId: transactionId,
     userId: userId,
     verified: false,
-    status: status,
+    // status: status,
     amount: amount,
-  };
+    formDates: formDates,
+    referredBy: referredBy,
+    userName: ''
+  }
   console.log(body);
   // return res.json(body)
-
+  
   User.findById(userId, (err, user) => {
-    if (err) {
+    if(err)
+    {
       return res.status(400).json({
         err: err.message,
       });
     }
+
+    body.userName = user.name;
 
     if (user.paymentID !== "") {
       return res.status(300).json({
@@ -113,52 +120,80 @@ exports.addTransaction = (req, res) => {
         data: body,
       });
     }
+    if (regDates !== user.regDates) {
+      return res.status(400).json({
+        message: "Dates were tampered with",
+        success: false,
+      });
+    }
     const transaction = Transaction(body);
-
+    // console.log("success saved trans");
     transaction.save((err, trn) => {
       if (err) {
         return res.status(400).json({
           message: "Failed to Add to our database. Please try again",
           err: err.message,
-          data: body,
+          data: body
         });
       }
       user.paymentID = transactionId;
       user.isPending = true;
-      if (regDates !== user.regDates) {
-        return res.status(400).json({
-          message: "Dates were tampered with",
-          success: false,
-        });
+      if(!user.regDates){
+        user.regDates = "000";
       }
-      for (var i = 0; i < 3; i++)
-        if (regDates[i] == "1" || formDates[i] == "1") regDates[i] = "1";
-      user.regDates = regDates;
+      // for (var i = 0; i < 3; i++)
+      //   if (regDates[i] == "1" || formDates[i] == "1") regDates[i] = "1";
+      // user.regDates = regDates;
+      user.paymentID = transactionId;
       user.save();
-
-      return res.status(200).json({
+      const response = {
         message: "Success",
         trnId: trn._id,
         ...user._doc,
         encry_password: undefined,
-        salt: undefined,
-      });
-    });
-  });
-};
+        salt:undefined
+      };
+      if(!referredBy || referredBy == "")
+      {
+        return res.status(200).json(response);
+      }
+      else{
+        Referrals.findOne({referralId: referredBy}, (err, referral) => {
+          if(err || !referral) {
+            return res.status(400).json({
+              message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
+              data: body
+            });
+          }
+
+          referral.referralCount += 1;
+          referral.save();
+
+          return res.status(200).json(response);
+        })
+      }
+    })
+  })
+}
 
 exports.manualPaymentVerification = (req, res) => {
-  const { transactionId } = req.body;
+  // console.log(req.body)
+  const { transactionId, isVerified } = req.body;
+
+  // console.log({ transactionId, isVerified });
 
   Transaction.findOne({ transactionId: transactionId }, (err, trn) => {
-    if (err) {
+    // console.log(err,trn)
+    if (err || !trn) {
       return res.status(400).json({
-        err: err.message,
+        message: "Transaction not found",
       });
     }
-    trn.verified = true;
+    
+    trn.verified = isVerified;
+    // console.log("Sufiyan Ansari 2")
+    trn.verificationStatus = isVerified ? 1 : 2;
     trn.save();
-
     User.findById(trn.userId, (err, user) => {
       if (err) {
         return res.status(400).json({
@@ -167,10 +202,39 @@ exports.manualPaymentVerification = (req, res) => {
       }
       user.paid = true;
       user.isPending = false;
-      user.save();
-      return res.status(200).json({
-        message: "Verified",
-      });
+      user.paymentID = '';
+      if(isVerified){
+        let s = [];
+        for(var i = 0; i < 3; ++i){
+          if(trn.formDates[i] == '1' || user.regDates[i] == '1')s.push('1');
+          else s.push('0');
+        }
+        s = s.join('');
+        user.regDates = s;
+
+        user.save();
+        return res.status(200).json({
+          message: "Verified",
+        });
+
+      }
+      else {
+        user.save();
+        Referrals.findOne({referralId: trn.referredBy}, (err, referral) => {
+          if(err || !referral) {
+            return res.status(200).json({
+              message: "Verified",
+            });
+          }
+
+          referral.referralCount -= 1;
+          referral.save();
+
+          return res.status(200).json({
+            message: "Verified",
+          });
+        })
+      }
     });
   });
 };
@@ -190,12 +254,46 @@ exports.checkStatus = (req, res) => {
 exports.getAllTransactions = (req, res) => {
   Transaction.find().then((trn) => {
     return res.status(200).json(trn);
-  });
-};
+  })
+}
+
+const makeReferralCode = (code) => {
+  var cd = "TZ";
+  var count = 2;
+  if(code > 9)
+    count -= 1
+  if(code > 99)
+    count -= 1
+  for(var i=0;i<count;i++) {
+    cd += "0"
+  }
+  cd += code;
+  return cd;
+}
+
+exports.addReferralCodes = (req, res) => {
+  const { referralCodes } = req.body;
+  referralCodes.forEach((code) => {
+    code.referralId = makeReferralCode(code.referralId)
+    const ref = new Referrals(code);
+    ref.save((err, ref) => {
+      if(err){
+        console.log("Error Occured at:",code.referralId,code.subCoreName);
+        console.log("Error:", err.message)
+        return res.status(400).json({message: err.message, success: false })
+      }
+      console.log("[Success]", ref.referralId, ref.subCoreName)
+    })
+  })
+  return res.json({ message: "All Executed Successfully"})
+}
 
 exports.getTransactions = (req, res) => {
   const userId = req.auth?._id;
+  console.log(userId);
   Transaction.find({ userId: userId }).then((user) => {
+    // console.log("hit");
+    console.log(user);
     return res.status(200).json(user);
   });
 };

@@ -68,17 +68,21 @@ exports.addEvent = (req, res) => {
       });
     }
 
-    var fields = req.body.all;
-    
+    var fields = req.body;
+  
     fields.forEach(field => {
 
-      field.start_time = valToTime(field.start_time)
+      if(field.start_time)field.start_time = valToTime(field.start_time)
       field.start_date = valToDate(field.start_date)
 
-      field.end_time = valToTime(field.end_time)
+      if(field.end_time)field.end_time = valToTime(field.end_time)
       field.end_date = valToDate(field.end_date)
 
       field.organised_by = splitTrim(field.organised_by)
+
+      if(field.location)field.location = field.location || 'TBD'
+
+      if(field.poster) field.poster = field.poster || 'https://pbs.twimg.com/profile_images/908005302225723392/SEaaeJUH_400x400.jpg'
 
       // return res.json(field)
       // let start_date = new Date(field.start_date)
@@ -109,7 +113,7 @@ exports.addEvent = (req, res) => {
 exports.getEvents = (req, res) => {
   try {
     Event.find()
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .then((events) => {
         res.status(200).json(events);
       })
@@ -138,10 +142,76 @@ exports.getEventById = (req, res) => {
   }
 };
 
-exports.getEventByEventID = (req, res) => {
+exports.getEventByEventID =  (req, res) => {
   try {
     const id = req.params.id || req.query.id;
     Event.find({ eventID: id }, (err, event) => {
+      if (!err) {
+        res.status(200).send(event);
+      } else {
+        res.status(400).send({ message: err.message });
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
+exports.fieldchange =  (req,res) => {
+
+  try{
+  Event.find( (err, event) => {
+          if (err) {
+            res.status(404).json({
+              error: err,
+            });
+          }
+
+          for(let i=0 ; i<event.length;i++)
+          { 
+            if(event[i].price == null || event[i].formLink == null || event[i].category == null )  {
+            
+              if(event[i].price == null) event[i].price = "Free";
+              if(event[i].formLink == null) event[i].formLink = "NA";
+              if(event[i].category == null) event[i].category = "";
+              Event.findByIdAndUpdate(event[i]._id, event[i], { useFindAndModify: false })
+              .then((data) => {
+                if (!data) {
+                  res.status(400).send({ message: "Cannot update" });
+                } 
+              })
+              .catch((err) => {
+                res.status(500).send({ message: err.message });
+              });
+          }
+        }
+        res.status(200).json(event);
+        })
+      }
+catch (err) {
+  return res.status(500).json({ message: err.message, success: false });
+}
+}
+
+exports.getEventByCategorySpotlight = (req, res) => {
+  try {
+    const spotlight = "Spotlight";
+    Event.find({ category: spotlight }, (err, event) => {
+      if (!err) {
+        res.status(200).send(event);
+      } else {
+        res.status(400).send({ message: err.message });
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
+exports.getEventByCategoryWorkshop = (req, res) => {
+  try {
+    const workshop = "Workshop";
+    Event.find({ category : workshop }, (err, event) => {
       if (!err) {
         res.status(200).send(event);
       } else {

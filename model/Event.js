@@ -83,6 +83,18 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    price : {
+      type: String,
+      default: "Free",
+    },
+    formLink : {
+    type : String,
+    default: "NA",
+    },
+    category : {
+     type : String,
+     default: "",
+  } ,
   },
   { timestamps: true }
 );

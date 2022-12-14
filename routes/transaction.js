@@ -1,25 +1,30 @@
 const express = require("express");
 const route = express.Router();
 
+
+// MIDDLEWARE
+const {
+  isSignedIn, isTreasury,
+} = require("../middleware/auth");
+
 const {
   addTransaction,
   manualPaymentVerification,
   getAllTransactions,
   checkStatus,
   getTransactions,
+  addReferralCodes
 } = require("../controller/payment.js");
 
-// MIDDLEWARE
-const { isSignedIn } = require("../middleware/auth");
 
 route.post("/addTransaction", isSignedIn, addTransaction);
 
-route.post("/manualPaymentVerification", manualPaymentVerification);
+route.post("/manualPaymentVerification", isSignedIn, isTreasury, manualPaymentVerification);
 
 route.get("/CheckVerificationStatus", checkStatus);
 
-route.get("/getAllTransactions", getAllTransactions);
+route.post("/getAllTransactions", isSignedIn, isTreasury, getAllTransactions);
 
-route.get("/getTransactions", isSignedIn, getTransactions);
+route.post("/getTransactions", isSignedIn, getTransactions);
 
 module.exports = route;

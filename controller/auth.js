@@ -92,41 +92,82 @@ exports.getAllUsers = (req, res) => {
 
 exports.getUserCount = (req, res) => {
   try {
-    let userCount = 0;
-    User.find({}, (err, user) => {
-      if (err) {
-        res.status(404).json({
-          error: err,
-        });
+    User.countDocuments( {}, function(err, result){
+
+      if(err){
+          res.send(err)
       }
-      userCount++;
-    });
-    res.status(200).json({
-      userCount: userCount,
-    });
+      else{
+        console.log(result);
+          res.status(200).json({
+                  studentCount: result,
+                });
+      }
+    
+    })
   } catch (err) {
     return res.status(500).json({ message: err.message, success: false });
   }
 };
 
-exports.getUserCount = (req, res) => {
+exports.getUserCountStatusPending = (req, res) => {
   try {
-    let studentCount = 0;
-    User.find({ isStudent: true }, (err, user) => {
-      if (err) {
-        res.status(404).json({
-          error: err,
-        });
+    User.countDocuments( {isPending : true}, function(err, result){
+
+      if(err){
+          res.send(err)
       }
-      studentCount++;
-    });
-    res.status(200).json({
-      studentCount: studentCount,
-    });
+      else{
+        console.log(result);
+          res.status(200).json({
+                  studentCount: result,
+                });
+      }
+    
+    })
   } catch (err) {
     return res.status(500).json({ message: err.message, success: false });
   }
 };
+
+exports.getUserCountStatusVerified = (req, res) => {
+  try {
+    User.countDocuments( {paid : true}, function(err, result){
+
+      if(err){
+          res.send(err)
+      }
+      else{
+        console.log(result);
+          res.status(200).json({
+                  studentCount: result,
+                });
+      }
+    
+    })
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
+// exports.getUserCount = (req, res) => {
+//   try {
+//     let studentCount = 0;
+//     User.find({ isStudent: true }, (err, user) => {
+//       if (err) {
+//         res.status(404).json({
+//           error: err,
+//         });
+//       }
+//       studentCount++;
+//     });
+//     res.status(200).json({
+//       studentCount: studentCount,
+//     });
+//   } catch (err) {
+//     return res.status(500).json({ message: err.message, success: false });
+//   }
+// };
 
 exports.issignedin = (req, res) => {
   const token = req.body.token;

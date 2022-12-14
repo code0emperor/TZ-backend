@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const transactionSchema = new mongoose.Schema(
   {
     transactionId: {
-      type: Array,
+      type: String,
       required: true,
       unique: true,
     },
@@ -11,13 +11,17 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userName: {
+      type: String,
+      default: ''
+    },
     verified: {
       type: Boolean,
       default: false,
     },
     status: {
       type: String,
-      default: "Success",
+      default: "Pending",
       required: true,
     },
     formDates: {
@@ -28,6 +32,15 @@ const transactionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    referredBy:{
+      type: String,
+      default: '',
+      required: false,
+    },
+    verificationStatus:{
+      type: Number,   // 0 - pending, 1 - success, 2 - reject
+      default: 0,
+    }
   },
   { timestamps: true }
 );
