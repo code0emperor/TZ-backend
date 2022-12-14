@@ -280,9 +280,8 @@ exports.addReferralCodes = (req, res) => {
       if(err){
         console.log("Error Occured at:",code.referralId,code.subCoreName);
         console.log("Error:", err.message)
-        return res.status(400).json({message: err.message, success: false })
       }
-      console.log("[Success]", ref.referralId, ref.subCoreName)
+      else console.log("[Success]", code.referralId, code.subCoreName)
     })
   })
   return res.json({ message: "All Executed Successfully"})

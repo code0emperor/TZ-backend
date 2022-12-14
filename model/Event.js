@@ -68,6 +68,7 @@ const eventSchema = new mongoose.Schema(
     },
     duration: {
       type: String,
+      default: "NA"
     },
     is_live: {
       type: Boolean,
@@ -81,6 +82,14 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    category: {
+      type: String,
+      required: false
+    },
+    formLink : {
+      type: String,
+      required: false
+    }
   },
   { timestamps: true }
 );
