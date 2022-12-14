@@ -60,10 +60,12 @@ const eventSchema = new mongoose.Schema(
     },
     end_time: {
       type: String,
+      default: "00:00AM",
       // required: [true, "Please the end time!"],
     },
     start_time: {
       type: String,
+      default: "00:00AM",
       // required: [true, "Please enter start time!"],
     },
     duration: {
