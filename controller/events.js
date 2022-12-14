@@ -170,7 +170,7 @@ exports.fieldchange =  (req,res) => {
           for(let i=0 ; i<event.length;i++)
           { 
             if(event[i].price == null || event[i].formLink == null || event[i].category == null )  {
-              // event[i].test = "chutiya";
+            
               if(event[i].price == null) event[i].price = "Free";
               if(event[i].formLink == null) event[i].formLink = "NA";
               if(event[i].category == null) event[i].category = "";
