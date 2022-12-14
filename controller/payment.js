@@ -83,7 +83,16 @@ exports.paymentVerification = async (req, res) => {
 exports.addTransaction = (req, res) => {
   const { transactionId, amount, referredBy, regDates, formDates } = req.body;
   const userId = req.auth?._id;
-
+  var refss = undefined, refID = undefined, refUse = undefined;
+  if(referredBy && referredBy !== "")
+  {
+    refss = referredBy.split("/");
+    refID = referredBy, refUse = undefined;
+    if(refss.length > 1) {
+      refID = refss[0];
+      refUse = refss[1];
+    }
+  }
   if (!userId) {
     return res.status(401).json({
       message: "User Not Found",
@@ -153,12 +162,12 @@ exports.addTransaction = (req, res) => {
         encry_password: undefined,
         salt:undefined
       };
-      if(!referredBy || referredBy == "")
+      if(!refID || refID == "")
       {
         return res.status(200).json(response);
       }
       else{
-        Referrals.findOne({referralId: referredBy}, (err, referral) => {
+        Referrals.findOne({referralId: refID}, (err, referral) => {
           if(err || !referral) {
             return res.status(400).json({
               message: "Transaction is Successful.\nBut Incorrect Referral ID Entered.",
@@ -167,6 +176,8 @@ exports.addTransaction = (req, res) => {
           }
 
           referral.referralCount += 1;
+          if(refUse)
+            referral.usedBy.push(refUse);
           referral.save();
 
           return res.status(200).json(response);
@@ -279,7 +290,7 @@ exports.addReferralCodes = (req, res) => {
     ref.save((err, ref) => {
       if(err){
         console.log("Error Occured at:",code.referralId,code.subCoreName);
-        console.log("Error:", err.message)
+        console.log(err.message);
       }
       else console.log("[Success]", code.referralId, code.subCoreName)
     })
