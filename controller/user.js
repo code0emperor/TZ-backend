@@ -3,7 +3,6 @@ const crypto = require("crypto");
 const CryptoJS = require("crypto-js");
 const path = require("path");
 const dotenv = require("dotenv");
-const Token = require("../model/token");
 const nodemailer = require("nodemailer");
 
 dotenv.config({
@@ -125,62 +124,44 @@ exports.deleteUser = (req, res) => {
 exports.requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
-  const user = await User.findOne({ email });
+  User.findOne({ email }, (err, user) => {
+    if (!user)
+      res.status(403).json({ message: "User does not exist", success: false });
 
-  if (!user) res.status(403).send("User does not exist");
+    const resetToken = CryptoJS.AES.encrypt(
+      user.email,
+      process.env.SECRET
+    ).toString();
 
-  let token = await Token.findOne({ userId: user._id });
-  if (token) await token.deleteOne();
-  let resetToken = crypto.randomBytes(10).toString("hex");
-  const hash = crypto
-    .createHmac("sha256", process.env.SECRET)
-    .update(resetToken)
-    .digest("hex");
-
-  await new Token({
-    userId: user._id,
-    token: hash,
-    createdAt: Date.now(),
-  }).save();
-   
-  console.log(hash);console.log(user._id);
-  const link = `${process.env.HOST}/backend/resetPasswordPage?token=${resetToken}&id=${user._id}`;
-  sendMail(email, link);
-  return res.json({ message: "Mail Sent to Registered Mail" });
+    const link = `https://www.technozion.in/resetPasswordPage?token=${resetToken}`;
+    sendMail(email, link);
+    return res.json({ message: "Mail Sent to Registered Mail", success: true });
+  });
 };
 
-exports.resetPassword = async (req, res) => {
-  const userId = req.query.id;
-
+exports.resetPassword = (req, res) => {
   const token = req.query.token;
   // console.log(token);
-  let passwordResetToken = await Token.findOne({ userId });
-  console.log(passwordResetToken);
-  if (!passwordResetToken) {
+  let email = CryptoJS.AES.decrypt(token, process.env.SECRET).toString(
+    CryptoJS.enc.Utf8
+  );
+  console.log(email);
+  if (!email) {
     // return res.status(403).render("resetPassword", {
-      // authCode: 3,
-      // message: "Invalid or expired password reset token",
-      return res.status(403).json({message : "Invalid or expired reset token"});
+    // authCode: 3,
+    // message: "Invalid or expired password reset token",
+    return res.status(403).json({ message: "Invalid or expired reset token" });
     // });
   }
 
-  await User.findById(userId).exec((err, user) => {
+  User.findOne({ email }, (err, user) => {
     if (err || !user) {
       return res.status(400).json({
         id: req.auth._id,
         error: "Something unexpected happen",
       });
     }
-    const hash_token = crypto
-      .createHmac("sha256", process.env.SECRET)
-      .update(token)
-      .digest("hex");
-    if (hash_token != passwordResetToken.token) {
-      return res.status(403).render("resetPassword", {
-        authCode: 3,
-        message: "Invalid or expired password reset token",
-      });
-    }
+
     const { password1, password2 } = req.body;
     if (password1 != password2) {
       return res.status(403).render("resetPassword", {
@@ -188,32 +169,14 @@ exports.resetPassword = async (req, res) => {
         message: "Passwords Do Not match",
       });
     }
-    const hash = CryptoJS.AES.encrypt(
-      password1,
-      process.env.SECRET
-    ).toString();
+    const hash = CryptoJS.AES.encrypt(password1, process.env.SECRET).toString();
 
     user.encry_password = hash;
     console.log(hash);
-    User.findByIdAndUpdate(
-      { _id: user._id },
-      { $set: user },
-      { new: true },
-      async (err, new_user) => {
-        if (err) {
-          return res.status(400).json({
-            error: "You are not authorized to update this user",
-          });
-        }
-        await passwordResetToken.deleteOne();
-        user.salt = undefined;
-        user.encry_password = undefined;
-        // res.render("resetPassword", {
-        //   authCode: 3,
-        //   message: "Password reset successfully",
-        // });
-      }
-    );
+    user.save();
+    return res
+      .status(200)
+      .json({ message: "Password changed successfully", success: true });
   });
 };
 

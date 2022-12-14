@@ -60,15 +60,21 @@ const eventSchema = new mongoose.Schema(
     },
     end_time: {
       type: String,
+      default: "00:00AM",
       // required: [true, "Please the end time!"],
     },
     start_time: {
       type: String,
+      default: "00:00AM",
       // required: [true, "Please enter start time!"],
     },
     duration: {
       type: String,
+<<<<<<< HEAD
       default: "NA"
+=======
+      dafault: "0 Hours",
+>>>>>>> d95b80bfefe312d518c02bc029977d8c45d6c3d3
     },
     is_live: {
       type: Boolean,
@@ -82,14 +88,18 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    price: {
+      type: String,
+      default: "Free",
+    },
+    formLink: {
+      type: String,
+      default: "NA",
+    },
     category: {
       type: String,
-      required: false
+      default: "",
     },
-    formLink : {
-      type: String,
-      required: false
-    }
   },
   { timestamps: true }
 );

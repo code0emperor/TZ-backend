@@ -11,6 +11,8 @@ const {
   sendMail,
   getUserCount,
   getAllUsers,
+  getUserCountStatusPending,
+  getUserCountStatusVerified,
 } = require("../controller/auth");
 
 const {
@@ -41,6 +43,8 @@ route.post("/changePassword", isSignedIn, unauthorizedAccess, changePassword);
 route.post("/verifyEmail", verifyEmail);
 route.get("/getCurrentUser", isSignedIn, unauthorizedAccess, getCurrentUser);
 route.get("/getUserCount", getUserCount);
+route.get("/getUserCountStatusPending", getUserCountStatusPending);
+route.get("/getUserCountStatusVerified", getUserCountStatusVerified);
 route.get("/sendMail", isSignedIn, unauthorizedAccess, sendMail);
 
 route.get("/tzCheck", isSignedIn, unauthorizedAccess, isAdmin, getAllUsers);
