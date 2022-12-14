@@ -110,6 +110,46 @@ exports.getUserCount = (req, res) => {
   }
 };
 
+exports.getUserCountStatusPending = (req, res) => {
+  try {
+    User.countDocuments( {isPending : true}, function(err, result){
+
+      if(err){
+          res.send(err)
+      }
+      else{
+        console.log(result);
+          res.status(200).json({
+                  studentCount: result,
+                });
+      }
+    
+    })
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
+exports.getUserCountStatusVerified = (req, res) => {
+  try {
+    User.countDocuments( {paid : true}, function(err, result){
+
+      if(err){
+          res.send(err)
+      }
+      else{
+        console.log(result);
+          res.status(200).json({
+                  studentCount: result,
+                });
+      }
+    
+    })
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+
 // exports.getUserCount = (req, res) => {
 //   try {
 //     let studentCount = 0;
