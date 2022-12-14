@@ -231,7 +231,17 @@ exports.manualPaymentVerification = (req, res) => {
       }
       else {
         user.save();
-        Referrals.findOne({referralId: trn.referredBy}, (err, referral) => {
+        var refss = undefined, refID = undefined, refUse = undefined;
+        if(trn.referredBy && trn.referredBy !== "")
+        {
+          refss = trn.referredBy.split("/");
+          refID = trn.referredBy, refUse = undefined;
+          if(refss.length > 1) {
+            refID = refss[0];
+            refUse = refss[1];
+          }
+        }
+        Referrals.findOne({referralId: refID}, (err, referral) => {
           if(err || !referral) {
             return res.status(200).json({
               message: "Verified",
