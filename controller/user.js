@@ -174,6 +174,9 @@ exports.resetPassword = (req, res) => {
     user.encry_password = hash;
     console.log(hash);
     user.save();
+    return res
+      .status(200)
+      .json({ message: "Password changed successfully", success: true });
   });
 };
 
