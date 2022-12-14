@@ -14,8 +14,12 @@ const {
   getEventByEventID,
   updateEvent,
   registerEvent,
+  fieldchange,
+  getEventByCategoryWorkshop,
+  getEventByCategorySpotlight,
   getParticipant,
 } = require("../controller/events");
+const router = require("./payment");
 
 route.post(
   "/addEvent",
@@ -28,6 +32,9 @@ route.post(
 route.get("/getEvents", getEvents);
 route.get("/getEvent/:id", getEventById);
 route.get("/getEventByEventID/:id", getEventByEventID);
+route.get("/getEventByCategoryWorkshop", getEventByCategoryWorkshop);
+route.get("/getEventByCategorySpotlight", getEventByCategorySpotlight);
+route.get("/fieldchange",fieldchange);
 route.get(
   "/deleteEvent/",
   isSignedIn,
