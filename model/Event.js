@@ -70,6 +70,7 @@ const eventSchema = new mongoose.Schema(
     },
     duration: {
       type: String,
+      dafault: "0 Hours",
     },
     is_live: {
       type: Boolean,
@@ -83,18 +84,18 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    price : {
+    price: {
       type: String,
       default: "Free",
     },
-    formLink : {
-    type : String,
-    default: "NA",
+    formLink: {
+      type: String,
+      default: "NA",
     },
-    category : {
-     type : String,
-     default: "",
-  } ,
+    category: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

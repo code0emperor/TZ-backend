@@ -142,8 +142,9 @@ exports.requestPasswordReset = async (req, res) => {
     token: hash,
     createdAt: Date.now(),
   }).save();
-   
-  console.log(hash);console.log(user._id);
+
+  console.log(hash);
+  console.log(user._id);
   const link = `${process.env.HOST}/backend/resetPasswordPage?token=${resetToken}&id=${user._id}`;
   sendMail(email, link);
   return res.json({ message: "Mail Sent to Registered Mail" });
@@ -158,9 +159,9 @@ exports.resetPassword = async (req, res) => {
   console.log(passwordResetToken);
   if (!passwordResetToken) {
     // return res.status(403).render("resetPassword", {
-      // authCode: 3,
-      // message: "Invalid or expired password reset token",
-      return res.status(403).json({message : "Invalid or expired reset token"});
+    // authCode: 3,
+    // message: "Invalid or expired password reset token",
+    return res.status(403).json({ message: "Invalid or expired reset token" });
     // });
   }
 
@@ -188,10 +189,7 @@ exports.resetPassword = async (req, res) => {
         message: "Passwords Do Not match",
       });
     }
-    const hash = CryptoJS.AES.encrypt(
-      password1,
-      process.env.SECRET
-    ).toString();
+    const hash = CryptoJS.AES.encrypt(password1, process.env.SECRET).toString();
 
     user.encry_password = hash;
     console.log(hash);
