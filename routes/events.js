@@ -25,7 +25,7 @@ route.post(
   "/addEvent",
   isSignedIn,
   unauthorizedAccess,
-  // hasReadWriteAccess,
+  hasReadWriteAccess,
   // upload.single("poster"),
   addEvent
 );
