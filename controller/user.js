@@ -133,14 +133,14 @@ exports.requestPasswordReset = async (req, res) => {
       process.env.SECRET
     ).toString();
 
-    const link = `https://www.technozion.in/resetPasswordPage?token=${resetToken}`;
+    const link = `https://www.technozion.in/resetPasswordPage/${resetToken}`;
     sendMail(email, link);
     return res.json({ message: "Mail Sent to Registered Mail", success: true });
   });
 };
 
 exports.resetPassword = (req, res) => {
-  const token = req.query.token;
+  const token = req.body.token;
   // console.log(token);
   let email = CryptoJS.AES.decrypt(token, process.env.SECRET).toString(
     CryptoJS.enc.Utf8
