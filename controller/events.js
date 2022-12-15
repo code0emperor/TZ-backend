@@ -73,11 +73,6 @@ exports.addEvent = (req, res) => {
     console.log(fields);
 
     fields.forEach((field) => {
-      if (field.start_time) field.start_time = valToTime(field.start_time);
-      field.start_date = valToDate(field.start_date);
-
-      if (field.end_time) field.end_time = valToTime(field.end_time);
-      field.end_date = valToDate(field.end_date);
 
       field.organised_by = splitTrim(field.organised_by);
 
