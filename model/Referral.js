@@ -21,6 +21,10 @@ const referralSchema = new mongoose.Schema({
     referralCount: {
         type: Number,
         default: 0
+    },
+    usedBy: {
+      type: Array,
+      default: []
     }
   },
   { timestamps: true }

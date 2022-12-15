@@ -27,4 +27,6 @@ route.post("/getAllTransactions", isSignedIn, isTreasury, getAllTransactions);
 
 route.post("/getTransactions", isSignedIn, getTransactions);
 
+// route.post("/addReferralCodes", addReferralCodes);
+
 module.exports = route;

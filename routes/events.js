@@ -50,7 +50,7 @@ route.get(
   deleteEvent
 );
 route.post(
-  "/updateEvent/:id",
+  "/updateEvent/",
   isSignedIn,
   unauthorizedAccess,
   hasReadWriteAccess,

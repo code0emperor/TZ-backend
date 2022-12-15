@@ -233,28 +233,27 @@ exports.updateEvent = (req, res) => {
   try {
     if (!req.body) {
       res.status(400).send({ message: "Data is required" });
-    }
+    }    
+    
+    const { allEvents }  = req.body;
 
-    const id = req.params.id;
-    var fields = req.body;
+    allEvents.forEach(fields => {
+      const id = fields._id;
 
-    if (fields.participant) fields.participant = splitTrim(fields.participant);
-
-    if (fields.gallery) fields.gallery = splitTrim(fields.gallery);
-
-    if (fields.video) fields.video = splitTrim(fields.video);
-
-    fields.Event.findByIdAndUpdate(id, fields, { useFindAndModify: false })
-      .then((data) => {
-        if (!data) {
-          res.status(400).send({ message: "Cannot update" });
-        } else {
-          res.status(200).json({ message: "Event updated successfully" });
-        }
-      })
-      .catch((err) => {
-        res.status(500).send({ message: err.message });
-      });
+      Event.findByIdAndUpdate(id, fields, { useFindAndModify: false })
+        .then((data) => {
+          if (!data) {
+            console.log("[Failed]:",fields.name);
+          } else {
+            console.log("[Success]:",fields.name);
+          }
+        })
+        .catch((err) => {
+          res.status(500).send({ message: err.message });
+        });
+    })
+    res.status(200).send({ message: "All changes were successfully updated"})
+    
   } catch (err) {
     return res.status(500).json({ message: err.message, success: false });
   }
