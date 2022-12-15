@@ -96,7 +96,7 @@ exports.addEvent = (req, res) => {
       // field.end_date = `${end_date.getFullYear}-${end_date.getMonth()}-${end_date.getDate()}`
 
       const event = new Event(field);
-      event.save((err, events) => {
+      event.save((err, event) => {
         if (err) {
           console.log("Error: " + field.name);
           console.log(err.message);
