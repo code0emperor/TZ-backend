@@ -22,8 +22,8 @@ exports.isAdmin = (req, res, next) => {
 };
 
 exports.hasReadWriteAccess = (req, res, next) => {
-  console.log("in readwrite");
-  console.log(req.auth);
+  // console.log("in readwrite");
+  // console.log(req.auth);
   User.findById(req.auth._id, (err, user) => {
     if (err || !user) {
       return res.status(404).json({ message: "User does not exist" });
