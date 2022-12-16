@@ -112,7 +112,7 @@ exports.addEvent = (req, res) => {
 exports.getEvents = (req, res) => {
   try {
     Event.find()
-      .sort({ start_date: 1 })
+      .sort({ createdAt: 1 })
       .then((events) => {
         res.status(200).json(events);
       })
@@ -156,43 +156,43 @@ exports.getEventByEventID = (req, res) => {
   }
 };
 
-// exports.fieldchange = (req, res) => {
-//   try {
-//     Event.find((err, event) => {
-//       if (err) {
-//         res.status(404).json({
-//           error: err,
-//         });
-//       }
+exports.fieldchange = (req, res) => {
+  try {
+    Event.find((err, event) => {
+      if (err) {
+        res.status(404).json({
+          error: err,
+        });
+      }
 
-//       for (let i = 0; i < event.length; i++) {
-//         if (
-//           event[i].price == null ||
-//           event[i].formLink == null ||
-//           event[i].category == null
-//         ) {
-//           if (event[i].price == null) event[i].price = "Free";
-//           if (event[i].formLink == null) event[i].formLink = "NA";
-//           if (event[i].category == null) event[i].category = "";
-//           Event.findByIdAndUpdate(event[i]._id, event[i], {
-//             useFindAndModify: false,
-//           })
-//             .then((data) => {
-//               if (!data) {
-//                 res.status(400).send({ message: "Cannot update" });
-//               }
-//             })
-//             .catch((err) => {
-//               res.status(500).send({ message: err.message });
-//             });
-//         }
-//       }
-//       res.status(200).json(event);
-//     });
-//   } catch (err) {
-//     return res.status(500).json({ message: err.message, success: false });
-//   }
-// };
+      for (let i = 0; i < event.length; i++) {
+        if (
+          event[i].price == null ||
+          event[i].formLink == null ||
+          event[i].category == null
+        ) {
+          if (event[i].price == null) event[i].price = "Free";
+          if (event[i].formLink == null) event[i].formLink = "NA";
+          if (event[i].category == null) event[i].category = "";
+          Event.findByIdAndUpdate(event[i]._id, event[i], {
+            useFindAndModify: false,
+          })
+            .then((data) => {
+              if (!data) {
+                res.status(400).send({ message: "Cannot update" });
+              }
+            })
+            .catch((err) => {
+              res.status(500).send({ message: err.message });
+            });
+        }
+      }
+      res.status(200).json(event);
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
 
 exports.getEventByCategorySpotlight = (req, res) => {
   try {
