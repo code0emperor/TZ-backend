@@ -112,7 +112,7 @@ exports.addEvent = (req, res) => {
 exports.getEvents = (req, res) => {
   try {
     Event.find()
-      .sort({ createdAt: 1 })
+      .sort({ start_date: 1 })
       .then((events) => {
         res.status(200).json(events);
       })
